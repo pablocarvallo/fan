@@ -1,5 +1,5 @@
 // Service worker mínimo: deja la app disponible sin conexión.
-const CACHE = 'fan-v3';
+const CACHE = 'fan-v4';
 const ASSETS = [
   './',
   'index.html',
