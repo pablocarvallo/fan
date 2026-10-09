@@ -20,7 +20,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
 <style>
 /* Concepto: una cartola de bolsillo. Arriba el saldo, en una tarjeta ciruela con el abanico dorado;
-   debajo las dos acciones (traer compras de Gmail, anotar un depósito) y el listado de movimientos,
+   debajo las dos acciones (traer compras de Mail, anotar un depósito) y el listado de movimientos,
    cada uno con el saldo que dejó. Ciruela como acento, dorado solo en el abanico, verde solo para el dinero que entra. */
 :root {
   --bg: #f3f1f5;
@@ -119,11 +119,12 @@ body {
 .app { max-width: 480px; margin: 0 auto; padding-block: 20px 40px; display: flex; flex-direction: column; gap: 18px; }
 button, input, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
-button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible, label.btn:focus-within { outline: 3px solid var(--ink); outline-offset: 2px; }
 h1, h2, h3 { margin: 0; font-family: var(--font-display); letter-spacing: -0.01em; text-wrap: balance; }
 .eyebrow { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
 .muted { color: var(--muted); margin: 0; }
 svg { display: block; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
 
 /* Encabezado */
 .top { display: flex; align-items: center; gap: 12px; }
@@ -183,13 +184,7 @@ svg { display: block; }
 /* Acciones principales */
 .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .actions .btn { min-width: 0; }
-.sync { display: flex; align-items: center; justify-content: center; gap: 8px; margin: -8px 0 0; font-size: 14px; color: var(--muted); text-align: center; }
-.sync i { width: 8px; height: 8px; border-radius: 50%; background: var(--in); flex: none; }
-.sync.busy i { background: var(--gold); }
-.sync.bad { color: var(--over); font-weight: 600; }
-.sync.bad i { background: var(--over); }
-.sync.plain { display: block; margin: -6px 0 0; }
-.under { display: flex; justify-content: center; flex-wrap: wrap; gap: 0 14px; margin-top: -14px; }
+.under { display: flex; justify-content: center; margin-top: -10px; }
 
 /* Primeros pasos */
 .steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
@@ -260,7 +255,7 @@ svg { display: block; }
 .panel .sub strong, .note strong { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 .field { display: flex; flex-direction: column; gap: 6px; border: 0; padding: 0; margin: 0; min-width: 0; }
 .field > span { font-size: 14px; font-weight: 600; padding: 0; }
-.field input[type="date"], .field input[type="time"], .field input[type="text"], .field input[type="url"] {
+.field input[type="date"], .field input[type="time"], .field input[type="text"] {
   display: block; width: 100%; min-width: 0; min-height: 52px; box-sizing: border-box;
   -webkit-appearance: none; appearance: none; font-size: 16px;
   border: 1.5px solid var(--line); border-radius: 12px; padding: 0 14px; background: var(--bg); color: var(--ink);
@@ -276,6 +271,8 @@ svg { display: block; }
 .err { margin: 0; padding: 10px 12px; border-radius: 12px; background: var(--over-bg); color: var(--over); font-weight: 600; font-size: 15px; }
 .note { margin: 0; padding: 10px 12px; border-radius: 12px; background: var(--accent-bg); color: var(--ink); font-size: 14px; }
 .stack { display: flex; flex-direction: column; gap: 10px; }
+.or { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+.or::before, .or::after { content: ""; flex: 1; border-top: 1px solid var(--line); }
 .found { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .found li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 10px 12px; border-radius: 12px; background: var(--bg); font-size: 15px; }
 .found li b { font-weight: 600; overflow-wrap: anywhere; }
@@ -286,7 +283,6 @@ svg { display: block; }
 .guide li::before { content: counter(paso); width: 28px; height: 28px; border-radius: 999px; background: var(--accent-bg); color: var(--accent); display: grid; place-items: center; font-weight: 700; font-size: 14px; }
 .guide li > div { min-width: 0; overflow-wrap: anywhere; }
 .guide strong { font-weight: 600; }
-.guide .btn { margin-top: 8px; }
 .mono { font-family: ui-monospace, Menlo, monospace; font-size: 14px; background: var(--track); padding: 1px 6px; border-radius: 6px; overflow-wrap: anywhere; }
 @keyframes rise { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .panel { animation: none; } }
@@ -305,6 +301,7 @@ svg { display: block; }
 <main class="app" id="app"></main>
 <div class="sheet" id="sheet" hidden></div>
 <div class="toast" id="toast" role="status" hidden></div>
+<input class="vh" type="file" id="file-in" accept=".txt,.text,text/plain" tabindex="-1" aria-hidden="true">
 
 <script>
 (function () {
@@ -324,12 +321,7 @@ svg { display: block; }
   var MAX_IGNORED = 400;
   var PAGE = 80;
   var SENDER = 'enviodigital@bancochile.cl';
-  var URL_RE = /^https:\/\/script\.google\.com\/(?:a\/macros\/[^\/\s]+|macros)\/s\/[\w-]+\/exec$/;
-  var FIRST_DAYS = 30;                 // primera lectura de Gmail: el último mes
-  var MAX_DAYS = 120;
-  var SYNC_EVERY = 2 * 60 * 1000;      // al volver a la app, no releer Gmail antes de 2 minutos
-  // Script que se pega en script.google.com (el mismo de apps-script/Codigo.gs)
-  var GAS_CODE = "/**\n * FAN · Avisos de compra del banco desde Gmail\n *\n * Qué hace: busca en tu Gmail los correos del remitente indicado, toma de cada uno la frase del\n * aviso (\"compra por $… en … el dd/mm/aaaa hh:mm\") y se la entrega a la app FAN cuando esta la pide.\n * Solo lee: no modifica, no envía ni borra correos.\n *\n * Cómo se publica: Implementar → Nueva implementación → Aplicación web,\n * con \"Ejecutar como: Yo\" y \"Quién tiene acceso: Cualquier usuario\".\n */\nvar REMITENTE = 'enviodigital@bancochile.cl';\nvar DIAS_MAX = 120;\nvar PATRON = /compra\\s+por\\s.{1,260}?\\d{1,2}\\/\\d{1,2}\\/\\d{4}\\s+\\d{1,2}:\\d{2}/gi;\n\n// FAN llama a esta función al abrir la app. Responde con los avisos de los últimos días.\nfunction doGet(e) {\n  var dias = parseInt(e && e.parameter && e.parameter.dias, 10);\n  if (!(dias >= 1)) dias = 30;\n  if (dias > DIAS_MAX) dias = DIAS_MAX;\n  var salida;\n  try {\n    salida = { ok: true, dias: dias, avisos: leerAvisos(dias) };\n  } catch (err) {\n    salida = { ok: false, error: String((err && err.message) || err) };\n  }\n  return ContentService.createTextOutput(JSON.stringify(salida)).setMimeType(ContentService.MimeType.JSON);\n}\n\nfunction leerAvisos(dias) {\n  var desde = new Date(Date.now() - dias * 24 * 60 * 60 * 1000);\n  var consulta = 'from:' + REMITENTE + ' newer_than:' + dias + 'd';\n  var avisos = [], vistos = {};\n  for (var inicio = 0; inicio < 400; inicio += 100) {\n    var hilos = GmailApp.search(consulta, inicio, 100);\n    GmailApp.getMessagesForThreads(hilos).forEach(function (mensajes) {\n      mensajes.forEach(function (m) {\n        if (m.getDate() < desde) return;\n        if (String(m.getFrom()).toLowerCase().indexOf(REMITENTE) < 0) return;\n        var hallados = limpiar(m.getPlainBody()).match(PATRON) || limpiar(m.getBody()).match(PATRON) || [];\n        hallados.forEach(function (frase) {\n          if (!vistos[frase]) { vistos[frase] = true; avisos.push(frase); }\n        });\n      });\n    });\n    if (hilos.length < 100) break;\n  }\n  return avisos;\n}\n\nfunction limpiar(texto) {\n  return String(texto || '')\n    .replace(/<[^>]+>/g, ' ')\n    .replace(/&nbsp;/gi, ' ')\n    .replace(/&#36;|&dollar;/gi, '$')\n    .replace(/&amp;/gi, '&')\n    .replace(/\\s+/g, ' ');\n}\n\n// Para probar desde el editor: elige \"probar\" arriba, toca Ejecutar y mira el registro de ejecución.\nfunction probar() {\n  var avisos = leerAvisos(30);\n  Logger.log(avisos.length + ' avisos de compra en los últimos 30 días');\n  avisos.forEach(function (frase) { Logger.log(frase); });\n}\n";
+  var FILE_NAME = 'fan.txt';
 
   var FAN = '<path d="M7.90 17.11L-1.90 12.12A15.60 15.60 0 0 1 1.56 7.61L8.92 15.78A4.60 4.60 0 0 0 7.90 17.11Z" fill="currentColor"/><path d="M8.92 15.78L1.56 7.61A15.60 15.60 0 0 1 6.41 4.64L10.35 14.91A4.60 4.60 0 0 0 8.92 15.78Z" fill="currentColor" opacity="0.5"/><path d="M10.35 14.91L6.41 4.64A15.60 15.60 0 0 1 12.00 3.60L12.00 14.60A4.60 4.60 0 0 0 10.35 14.91Z" fill="currentColor"/><path d="M12.00 14.60L12.00 3.60A15.60 15.60 0 0 1 17.59 4.64L13.65 14.91A4.60 4.60 0 0 0 12.00 14.60Z" fill="currentColor" opacity="0.5"/><path d="M13.65 14.91L17.59 4.64A15.60 15.60 0 0 1 22.44 7.61L15.08 15.78A4.60 4.60 0 0 0 13.65 14.91Z" fill="currentColor"/><path d="M15.08 15.78L22.44 7.61A15.60 15.60 0 0 1 25.90 12.12L16.10 17.11A4.60 4.60 0 0 0 15.08 15.78Z" fill="currentColor" opacity="0.5"/><circle cx="12" cy="19.2" r="2.2" fill="currentColor"/>';
   var I_FAN = '<svg viewBox="-3 2.4 30 20" width="30" height="20" aria-hidden="true">' + FAN + '</svg>';
@@ -345,16 +337,15 @@ svg { display: block; }
   var app = document.getElementById('app');
   var sheetEl = document.getElementById('sheet');
   var toastEl = document.getElementById('toast');
+  var fileIn = document.getElementById('file-in');
 
   var items = [];                                   // movimientos, del más antiguo al más reciente
-  var cfg = { amount: 0, at: '', ignored: [] };     // saldo ajustado, cuándo, y avisos del banco descartados
-  var prefs = { order: 'desc', url: '', last: 0 };  // de este dispositivo: orden, enlace del script de Gmail y última lectura
+  var cfg = { amount: 0, at: '', ignored: [] };     // saldo ajustado, cuándo, y avisos de Mail descartados
+  var prefs = { order: 'desc', linked: false };     // preferencias de este dispositivo
   var filter = 'all';                               // 'all' | 'c' compras y gastos | 'd' depósitos
   var shown = PAGE;
   var fresh = {};                                   // movimientos recién traídos, para marcarlos como nuevos
   var hasHost = !!(window.claude && window.claude.use);
-  var canSync = !hasHost;                           // dentro de Claude la página no puede llamar a Google
-  var syncing = false, syncErr = '', lastTry = 0;
   var loading = hasHost;
   var gotItems = false, gotCfg = false;
   var mode = 'local';
@@ -501,8 +492,7 @@ svg { display: block; }
     try {
       var p = JSON.parse(localStorage.getItem(LS_PREFS) || 'null') || {};
       prefs.order = p.order === 'asc' ? 'asc' : 'desc';
-      prefs.url = URL_RE.test(String(p.url || '')) ? String(p.url) : '';
-      prefs.last = prefs.url && +p.last > 0 ? +p.last : 0;
+      prefs.linked = !!p.linked;
     } catch (e) {}
   }
   function savePrefs() { try { localStorage.setItem(LS_PREFS, JSON.stringify(prefs)); } catch (e) {} }
@@ -571,7 +561,7 @@ svg { display: block; }
     } catch (e) { legacy(); }
   }
 
-  /* ---------- Traer compras: Gmail o texto pegado ---------- */
+  /* ---------- Traer compras: archivo de Atajos o texto pegado ---------- */
   function pending(parsed, source) {
     var have = {}, ign = {}, ups = [], known = 0, back = [];
     items.forEach(function (m) { if (m.key) have[m.key] = 1; });
@@ -579,8 +569,8 @@ svg { display: block; }
     parsed.found.forEach(function (p) {
       if (have[p.key]) { known++; return; }
       if (ign[p.key]) {
-        if (source === 'gmail') { known++; return; }   // se eliminó a propósito: Gmail no la devuelve
-        back.push(p.key);                               // pegarla a mano sí la recupera
+        if (source === 'file') { known++; return; }   // se eliminó a propósito: el archivo no la devuelve
+        back.push(p.key);                              // pegarla a mano sí la recupera
       }
       ups.push({ id: 'm' + hash(p.key), type: 'c', date: p.date, time: p.time, desc: p.merchant, amount: p.amount, src: 'mail', key: p.key, acct: p.acct, ts: Date.now() });
     });
@@ -592,110 +582,55 @@ svg { display: block; }
     if (parsed.foreign) parts.push(parsed.foreign + ' en dólares');
     return parts.length ? ' Sin contar: ' + parts.join(' y ') + '.' : '';
   }
-  // Agrega las compras leídas que falten y cuenta qué pasó, para que cada origen arme su mensaje
-  async function addParsed(parsed, source) {
-    var res = pending(parsed, source), out = { ok: true, found: parsed.found.length, added: 0, sum: 0, old: 0 };
-    if (!res.ups.length) return out;
-    var newCfg = res.back.length ? { amount: cfg.amount, at: cfg.at, ignored: cfg.ignored.filter(function (x) { return res.back.indexOf(x) < 0; }) } : null;
-    busy = true;
-    out.ok = await commit(res.ups, [], newCfg);
-    busy = false;
-    if (!out.ok) return out;
-    fresh = {};
-    res.ups.forEach(function (u) { fresh[u.id] = 1; out.sum += u.amount; if (cfg.at && dtOf(u) < cfg.at) out.old++; });
-    out.added = res.ups.length;
-    filter = 'all'; shown = PAGE;
-    return out;
-  }
-  function addedMsg(r, parsed) {
-    var msg = r.added + ' ' + plural(r.added, 'compra nueva', 'compras nuevas') + ' · ' + money(r.sum) + '.';
-    if (r.old) msg += ' ' + r.old + plural(r.old, ' es anterior', ' son anteriores') + ' al ajuste de saldo y no lo ' + plural(r.old, 'cambia', 'cambian') + '.';
-    return msg + (parsed ? skippedNote(parsed) : '');
-  }
-  async function importPaste() {
+  async function importText(text, source) {
     if (busy) return;
-    var parsed = parseMail(val('f-paste'));
-    if (!parsed.found.length) { pastePreview(); return; }
-    var r = await addParsed(parsed, 'paste');
-    if (!r.ok) return;
-    closeSheet(); render();
-    toast(r.added ? addedMsg(r, parsed) : r.found === 1 ? 'Esa compra ya estaba registrada.' : 'Esas compras ya estaban registradas.', null, null, 5200);
-  }
-
-  // Gmail: el script publicado en la cuenta de Google entrega las frases de los avisos de los últimos días
-  function cleanUrl(v) { return String(v || '').trim().replace(/[?#].*$/, ''); }
-  async function fetchAvisos(url, dias) {
-    var ctl = typeof AbortController === 'function' ? new AbortController() : null;
-    var timer = setTimeout(function () { if (ctl) ctl.abort(); }, 45000);
-    try {
-      var res = await fetch(url + '?dias=' + dias, { cache: 'no-store', credentials: 'omit', redirect: 'follow', signal: ctl ? ctl.signal : undefined });
-      var data = await res.json();
-      if (!data || data.ok !== true || !Array.isArray(data.avisos)) throw new Error('respuesta');
-      return data.avisos.filter(function (a) { return typeof a === 'string'; });
-    } finally { clearTimeout(timer); }
-  }
-  function syncDays() {
-    if (!prefs.last) return FIRST_DAYS;
-    return Math.min(MAX_DAYS, Math.max(2, Math.ceil((Date.now() - prefs.last) / 86400000) + 2));
-  }
-  function syncErrMsg() {
-    return syncErr === 'offline' ? 'Sin conexión: no se pudo leer Gmail.' : 'No se pudo leer Gmail. Revisa la conexión en «Conexión con Gmail».';
-  }
-  function ago(ts) {
-    var d = new Date(ts), mins = Math.floor((Date.now() - ts) / 60000), hm = pad(d.getHours()) + ':' + pad(d.getMinutes());
-    if (mins < 1) return 'hace un momento';
-    if (mins < 60) return 'hace ' + mins + ' min';
-    var day = dayLabel(dayKey(d));
-    return (day === 'Hoy' ? 'hoy' : day === 'Ayer' ? 'ayer' : 'el ' + day) + ' a las ' + hm;
-  }
-  async function syncGmail(manual) {
-    if (!canSync || !prefs.url || syncing || busy) return;
-    syncing = true; syncErr = ''; lastTry = Date.now();
-    render();
-    var parsed = null, r = null;
-    try {
-      var avisos = await fetchAvisos(prefs.url, syncDays());
-      parsed = parseMail(avisos.join('\n'));
-      r = await addParsed(parsed, 'gmail');
-      if (r.ok) { prefs.last = Date.now(); savePrefs(); }
-    } catch (e) { syncErr = navigator.onLine === false ? 'offline' : 'net'; }
-    syncing = false;
-    render();
-    if (r && r.ok && r.added) toast(addedMsg(r, null), null, null, 5200);
-    else if (manual && r && r.ok) toast('Gmail al día: sin compras nuevas.');
-    else if (manual && syncErr) toast(syncErrMsg(), null, null, 5200);
-  }
-  function autoSync() {
-    if (canSync && prefs.url && !sheet && !loading && Date.now() - lastTry > SYNC_EVERY) syncGmail(false);
-    else if (!sheet && !syncing) render();   // refresca «Hoy», «Ayer» y la hora de la última lectura
-  }
-  async function connectGmail() {
-    if (syncing || !sheet) return;
-    var url = cleanUrl(val('f-url'));
-    if (!url) { setErr('Pega el enlace de la aplicación web.'); return; }
-    if (/\/dev$/.test(url)) { setErr('Ese es el enlace de prueba. Usa el que termina en /exec, el que Google muestra al implementar.'); return; }
-    if (!URL_RE.test(url)) { setErr('El enlace debe empezar con https://script.google.com/macros/s/ y terminar en /exec.'); return; }
-    var btn = document.getElementById('f-connect'), avisos;
-    setErr('');
-    syncing = true; sheet.testing = true;
-    if (btn) { btn.disabled = true; btn.textContent = 'Probando la conexión…'; }
-    try {
-      avisos = await fetchAvisos(url, FIRST_DAYS);
-    } catch (e) {
-      syncing = false;
-      if (sheet) sheet.testing = false;
-      if (btn) { btn.disabled = false; btn.textContent = 'Probar y conectar'; }
-      setErr(navigator.onLine === false ? 'No hay conexión a internet.'
-        : 'No se pudo leer el script. Revisa que la implementación sea de tipo «Aplicación web», con acceso para «Cualquier usuario», y que hayas autorizado el acceso con tu cuenta.');
+    var parsed = parseMail(text), n = parsed.found.length;
+    if (!n) {
+      var why = parsed.credit || parsed.foreign
+        ? 'Solo encontré compras que no son de la cuenta.' + skippedNote(parsed)
+        : source === 'file' ? 'Ese archivo no tiene avisos de compra del banco.' : 'No reconozco un aviso de compra en ese texto.';
+      if (sheet && sheet.mode === 'mail') setErr(why); else toast(why, 'Ver guía', function () { openSheet('guide'); }, 6000);
       return;
     }
-    prefs.url = url; prefs.last = Date.now(); savePrefs();
-    var parsed = parseMail(avisos.join('\n'));
-    var r = await addParsed(parsed, 'gmail');
-    syncing = false; syncErr = ''; lastTry = Date.now();
-    closeSheet(); render();
-    toast('Gmail conectado. ' + (r.added ? addedMsg(r, parsed) : parsed.found.length ? 'Las compras del último mes ya estaban.' : 'No hay avisos de compra en los últimos ' + FIRST_DAYS + ' días.'), null, null, 6500);
+    if (source === 'file' && !prefs.linked) { prefs.linked = true; savePrefs(); }
+    var res = pending(parsed, source), k = res.ups.length;
+    if (!k) {
+      if (sheet) closeSheet();
+      render();
+      toast(n === 1 ? 'Esa compra ya estaba registrada.' : 'Sin compras nuevas: las ' + n + ' del archivo ya estaban.');
+      return;
+    }
+    var newCfg = res.back.length ? { amount: cfg.amount, at: cfg.at, ignored: cfg.ignored.filter(function (x) { return res.back.indexOf(x) < 0; }) } : null;
+    busy = true;
+    var ok = await commit(res.ups, [], newCfg);
+    busy = false;
+    if (!ok) return;
+    fresh = {};
+    res.ups.forEach(function (u) { fresh[u.id] = 1; });
+    filter = 'all'; shown = PAGE;
+    if (sheet) closeSheet();
+    render();
+    var sum = 0, old = 0;
+    res.ups.forEach(function (u) { sum += u.amount; if (cfg.at && dtOf(u) < cfg.at) old++; });
+    var msg = k + ' ' + plural(k, 'compra nueva', 'compras nuevas') + ' · ' + money(sum) + '.';
+    if (old) msg += ' ' + old + plural(old, ' es anterior', ' son anteriores') + ' al ajuste de saldo y no lo ' + plural(old, 'cambia', 'cambian') + '.';
+    toast(msg + skippedNote(parsed), null, null, 5200);
   }
+  function readFile(f) {
+    if (f.text) return f.text();
+    return new Promise(function (res, rej) {
+      var r = new FileReader();
+      r.onload = function () { res(String(r.result || '')); };
+      r.onerror = rej;
+      r.readAsText(f);
+    });
+  }
+  fileIn.addEventListener('change', function () {
+    var f = fileIn.files && fileIn.files[0];
+    if (!f) return;
+    if (f.size > 8 * 1024 * 1024) { fileIn.value = ''; toast('Ese archivo es demasiado grande para ser el de Atajos.'); return; }
+    readFile(f).then(function (text) { fileIn.value = ''; importText(text, 'file'); }, function () { fileIn.value = ''; toast('No se pudo leer el archivo.'); });
+  });
 
   /* ---------- Vistas ---------- */
   function header() {
@@ -729,21 +664,9 @@ svg { display: block; }
   }
 
   function actions() {
-    var main;
-    if (!canSync) main = '<button class="btn primary big" data-act="paste">' + I_MAIL + 'Pegar aviso</button>';
-    else if (!prefs.url) main = '<button class="btn primary big" data-act="gmail">' + I_MAIL + 'Conectar Gmail</button>';
-    else main = '<button class="btn primary big" data-act="sync"' + (syncing ? ' disabled' : '') + '>' + I_MAIL + (syncing ? 'Leyendo…' : 'Traer de Gmail') + '</button>';
-    var h = '<div class="actions">' + main + '<button class="btn ghost big" data-act="add">' + I_PLUS + 'Depósito</button></div>';
-    if (!canSync) {
-      h += '<p class="sync plain">Aquí las compras se agregan pegando el aviso. La lectura automática de Gmail funciona en la app instalada desde GitHub.</p>';
-    } else if (prefs.url) {
-      if (syncing) h += '<div class="sync busy" role="status"><i></i><span>Leyendo los avisos en Gmail…</span></div>';
-      else if (syncErr) h += '<div class="sync bad" role="status"><i></i><span>' + syncErrMsg() + '</span></div>';
-      else h += '<div class="sync"><i></i><span>Gmail conectado · ' + (prefs.last ? 'leído ' + ago(prefs.last) : 'aún sin leer') + '</span></div>';
-      h += '<div class="under"><button class="linkbtn" data-act="paste">Pegar un aviso</button><button class="linkbtn" data-act="gmail">Conexión con Gmail</button></div>';
-    } else {
-      h += '<div class="under"><button class="linkbtn" data-act="paste">Pegar un aviso</button></div>';
-    }
+    var h = '<div class="actions"><button class="btn primary big" data-act="mail">' + I_MAIL + 'Traer de Mail</button>' +
+      '<button class="btn ghost big" data-act="add">' + I_PLUS + 'Depósito</button></div>';
+    if (prefs.linked) h += '<div class="under"><button class="linkbtn" data-act="mail-sheet">Pegar un aviso o ver la guía</button></div>';
     return h;
   }
 
@@ -754,8 +677,8 @@ svg { display: block; }
     }
     return '<section aria-label="Primeros pasos"><div class="sec-head"><h2>Primeros pasos</h2></div><ol class="steps">' +
       step(1, 'adjust', !!cfg.at, 'Define el saldo', 'El que muestra hoy la app del banco.') +
-      (canSync ? step(2, 'gmail', !!prefs.url, 'Conecta Gmail', 'FAN lee los avisos de compra del banco y los trae al abrir la app.')
-               : step(2, 'paste', false, 'Pega tu primer aviso', 'Copia el texto del correo del banco y FAN extrae los datos.')) +
+      step(2, 'guide', prefs.linked, 'Conecta Mail con Atajos', 'Una automatización guarda cada aviso de compra del banco.') +
+      step(3, 'mail-sheet', false, 'Trae tu primera compra', 'Desde el archivo de Atajos, o pegando el texto de un aviso.') +
       '</ol></section>';
   }
 
@@ -764,7 +687,7 @@ svg { display: block; }
     var icon = isIn ? I_IN : m.src === 'mail' ? I_BAG : I_OUT;
     var what = isIn ? 'Depósito' : m.src === 'mail' ? 'Compra' : 'Gasto';
     var amt = (isIn ? '+' : '−') + '$' + dots(m.amount);
-    var meta = dayLabel(m.date) + ' · ' + m.time + (m.src === 'mail' ? ' · Aviso' : '') + (multiAcct && m.acct ? ' · ··' + m.acct : '');
+    var meta = dayLabel(m.date) + ' · ' + m.time + (m.src === 'mail' ? ' · Mail' : '') + (multiAcct && m.acct ? ' · ··' + m.acct : '');
     return '<li><button class="row' + (r.counts || !cfg.at ? '' : ' old') + '" data-act="edit" data-id="' + m.id + '" aria-label="Editar ' + what.toLowerCase() + ': ' + esc(m.desc) + ', ' + amt + ', ' + fmt(m.date) + '">' +
       '<span class="ico' + (isIn ? ' in' : '') + '">' + icon + '</span>' +
       '<span class="info"><span class="store">' + esc(m.desc) + (fresh[m.id] ? '<span class="tag">Nueva</span>' : '') + '</span><span class="meta">' + meta + '</span></span>' +
@@ -844,7 +767,7 @@ svg { display: block; }
   function sheetMove(s) {
     var today = todayKey(), p = s.id ? find(s.id) : null;
     var type = p ? p.type : s.type, mail = !!p && p.src === 'mail';
-    var title = p ? (mail ? 'Compra del aviso' : type === 'd' ? 'Editar depósito' : 'Editar gasto') : 'Anotar movimiento';
+    var title = p ? (mail ? 'Compra desde Mail' : type === 'd' ? 'Editar depósito' : 'Editar gasto') : 'Anotar movimiento';
     var dateV = p ? p.date : (s.keepDate || today), timeV = p ? p.time : nowTime();
     var opts = mail ? '' : descOptions(type).map(function (x) { return '<option value="' + esc(x) + '"></option>'; }).join('');
     var note = anchorNote(dateV, timeV);
@@ -880,51 +803,42 @@ svg { display: block; }
       '<button type="button" class="btn ghost block" data-act="cancel">Cancelar</button></div></form>';
   }
 
-  function sheetPaste() {
+  function sheetMail() {
     return '<div class="panel" id="sheet-form" role="dialog" aria-modal="true" aria-labelledby="sheet-title" tabindex="-1">' +
-      '<h2 id="sheet-title">Pegar un aviso</h2>' +
-      '<p class="sub">Copia el texto del correo del banco y pégalo aquí. FAN extrae la fecha, el comercio y el monto.</p>' +
+      '<h2 id="sheet-title">Compras desde Mail</h2>' +
+      '<p class="sub">La app Atajos guarda cada aviso del banco en el archivo <strong>' + FILE_NAME + '</strong>. Elígelo y FAN agrega las compras que falten.</p>' +
+      '<div class="stack"><label class="btn primary block" for="file-in" id="f-pick" tabindex="0" role="button">Elegir ' + FILE_NAME + ' en Archivos</label>' +
+      '<button type="button" class="btn ghost block" data-act="guide">' + (prefs.linked ? 'Ver la guía del atajo' : 'Configurar el atajo (una sola vez)') + '</button></div>' +
+      '<div class="or"><span>o pega un aviso</span></div>' +
       '<label class="field"><span>Texto del correo del banco</span><textarea id="f-paste" rows="4" autocomplete="off" spellcheck="false" placeholder="Te informamos que se ha realizado una compra por $12.990 con cargo a Cuenta ****0000 en COMERCIO el 01/10/2026 12:30."></textarea></label>' +
       '<ul class="found" id="f-found" hidden></ul>' +
       '<p class="err" id="f-err" role="alert" hidden></p>' +
-      '<div class="stack"><button type="button" class="btn primary block" id="f-paste-add" data-act="paste-add" disabled>Agregar compra</button>' +
+      '<div class="stack"><button type="button" class="btn tonal block" id="f-paste-add" data-act="paste-add" disabled>Agregar compra</button>' +
       '<button type="button" class="btn ghost block" data-act="cancel">Cerrar</button></div></div>';
   }
 
-  function sheetGmail() {
-    if (prefs.url) {
-      return '<div class="panel" id="sheet-form" role="dialog" aria-modal="true" aria-labelledby="sheet-title" tabindex="-1">' +
-        '<h2 id="sheet-title">Conexión con Gmail</h2>' +
-        '<p class="sub">FAN lee los avisos de <strong>' + SENDER + '</strong> al abrir la app y agrega las compras que falten.' +
-        (prefs.last ? ' Última lectura: ' + ago(prefs.last) + '.' : '') + '</p>' +
-        '<p class="note">El enlace del script queda guardado solo en este dispositivo. Si alguna vez lo compartes por error, archiva la implementación en Google y crea una nueva.</p>' +
-        '<div class="stack"><button type="button" class="btn primary block" data-act="sync-now">Traer de Gmail ahora</button>' +
-        '<button type="button" class="btn ghost block" data-act="copy-script">Copiar el script</button>' +
-        '<button type="button" class="btn danger block" data-act="disconnect">Desconectar Gmail</button>' +
-        '<button type="button" class="btn ghost block" data-act="cancel">Cerrar</button></div></div>';
-    }
-    return '<form class="panel" id="sheet-form" novalidate role="dialog" aria-modal="true" aria-labelledby="sheet-title" tabindex="-1">' +
-      '<h2 id="sheet-title">Conectar Gmail</h2>' +
-      '<p class="sub">Un script en tu cuenta de Google lee los avisos de <strong>' + SENDER + '</strong> y FAN los trae al abrir la app. Se configura una sola vez; es más cómodo hacerlo en un computador.</p>' +
+  function sheetGuide() {
+    return '<div class="panel" id="sheet-form" role="dialog" aria-modal="true" aria-labelledby="sheet-title" tabindex="-1">' +
+      '<h2 id="sheet-title">Conectar Mail con Atajos</h2>' +
+      '<p class="sub">iOS no permite que una app lea tu correo por su cuenta. El puente es la app Atajos: cada vez que Mail recibe un aviso del banco, guarda su texto en un archivo que FAN sabe leer. Se configura una sola vez.</p>' +
       '<ol class="guide">' +
-      '<li><div>Entra a <span class="mono">script.google.com</span> con tu cuenta de Gmail y crea un <strong>Nuevo proyecto</strong>.</div></li>' +
-      '<li><div>Borra lo que trae el editor, pega el script y guarda.<br><button type="button" class="btn tonal small" data-act="copy-script">Copiar el script</button></div></li>' +
-      '<li><div>Toca <strong>Implementar → Nueva implementación</strong> y elige el tipo <strong>Aplicación web</strong>. En <strong>Ejecutar como</strong> deja <strong>Yo</strong> y en <strong>Quién tiene acceso</strong> elige <strong>Cualquier usuario</strong>.</div></li>' +
-      '<li><div>Toca <strong>Implementar</strong> y autoriza el acceso. Google avisa que la app no está verificada porque el script es tuyo: entra por <strong>Configuración avanzada</strong> y continúa.</div></li>' +
-      '<li><div>Copia la <strong>URL de la aplicación web</strong>, la que termina en <span class="mono">/exec</span>, y pégala aquí.</div></li>' +
+      '<li><div>Abre <strong>Atajos</strong>, entra a <strong>Automatización</strong> y toca <strong>+</strong>. Si es tu primera automatización, el botón dice <strong>Crear automatización personal</strong>.</div></li>' +
+      '<li><div>Elige <strong>Correo electrónico</strong>. En <strong>Remitente</strong> escribe <span class="mono">' + SENDER + '</span></div></li>' +
+      '<li><div>Marca <strong>Ejecutar inmediatamente</strong> y toca <strong>Siguiente</strong>.</div></li>' +
+      '<li><div>Elige <strong>Nueva automatización en blanco</strong>, toca <strong>Agregar acción</strong>, busca «archivo de texto» y elige <strong>Agregar a archivo de texto</strong>.</div></li>' +
+      '<li><div>En la acción, toca <strong>Texto</strong> y elige <strong>Entrada del atajo</strong>. En <strong>Ruta del archivo</strong> escribe <span class="mono">' + FILE_NAME + '</span> y deja la carpeta <strong>Atajos</strong> (Shortcuts) de iCloud Drive.</div></li>' +
+      '<li><div>Toca <strong>Listo</strong>. Desde la próxima compra, vuelve a FAN, toca <strong>Traer de Mail</strong> y elige <span class="mono">' + FILE_NAME + '</span> en Archivos → iCloud Drive → Atajos.</div></li>' +
       '</ol>' +
-      '<label class="field"><span>Enlace de la aplicación web</span><input type="url" id="f-url" inputmode="url" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="go" placeholder="https://script.google.com/macros/s/…/exec"></label>' +
-      '<p class="note">Quien tenga ese enlace puede ver tus avisos de compra. No lo compartas: queda guardado solo en este dispositivo.</p>' +
-      '<p class="err" id="f-err" role="alert" hidden></p>' +
-      '<div class="stack"><button type="submit" class="btn primary block" id="f-connect">Probar y conectar</button>' +
-      '<button type="button" class="btn ghost block" data-act="cancel">Cancelar</button></div></form>';
+      '<p class="note">Los avisos deben llegar a una cuenta agregada en la app Mail del iPhone; una cuenta de Gmail agregada ahí también sirve. Los nombres pueden variar un poco según la versión de iOS. Si algo no calza, siempre puedes copiar el texto del aviso y pegarlo en FAN.</p>' +
+      '<div class="stack"><button type="button" class="btn tonal block" data-act="copy-sender">Copiar el remitente</button>' +
+      '<button type="button" class="btn primary block" data-act="guide-done">Listo</button></div></div>';
   }
 
   function renderSheet() {
     var s = sheet, h = '<div class="backdrop" data-act="cancel"></div>';
     if (s.mode === 'adjust') h += sheetAdjust();
-    else if (s.mode === 'paste') h += sheetPaste();
-    else if (s.mode === 'gmail') h += sheetGmail();
+    else if (s.mode === 'mail') h += sheetMail();
+    else if (s.mode === 'guide') h += sheetGuide();
     else h += sheetMove(s);
     sheetEl.innerHTML = h;
   }
@@ -939,13 +853,13 @@ svg { display: block; }
   }
   function openSheet(m, id) {
     if (m === 'edit' && !find(id)) return;
-    sheet = { mode: m, id: id || null, del: false, type: 'd', testing: false };
+    sheet = { mode: m, id: id || null, del: false, type: 'd', back: sheet && sheet.mode === 'mail' && m === 'guide' };
     renderSheet();
     sheetEl.hidden = false;
     document.documentElement.classList.add('lock');
     toastEl.hidden = true;
     fitSheet();
-    var target = document.getElementById(m === 'add' ? 'f-amount' : m === 'adjust' ? 'f-saldo' : m === 'paste' ? 'f-paste' : 'sheet-form');
+    var target = document.getElementById(m === 'add' ? 'f-amount' : m === 'adjust' ? 'f-saldo' : 'sheet-form');
     if (target) target.focus();
   }
   function closeSheet() {
@@ -1021,17 +935,11 @@ svg { display: block; }
     var b = ev.target.closest('[data-act]');
     if (!b || !sheet) return;
     var a = b.getAttribute('data-act');
-    if (a === 'cancel') { if (!busy && !sheet.testing) closeSheet(); return; }
-    if (a === 'copy-script') { copyText(GAS_CODE, 'Script copiado'); return; }
-    if (a === 'paste-add') { importPaste(); return; }
-    if (a === 'sync-now') { closeSheet(); syncGmail(true); return; }
-    if (a === 'disconnect') {
-      if (!sheet.del) { sheet.del = true; b.textContent = 'Toca de nuevo para desconectar'; b.classList.add('armed'); return; }
-      prefs.url = ''; prefs.last = 0; syncErr = ''; savePrefs();
-      closeSheet(); render();
-      toast('Gmail desconectado. Tus movimientos siguen aquí.');
-      return;
-    }
+    if (a === 'cancel') { if (!busy) closeSheet(); return; }
+    if (a === 'guide') { openSheet('guide'); return; }
+    if (a === 'guide-done') { if (sheet.back) openSheet('mail'); else closeSheet(); return; }
+    if (a === 'copy-sender') { copyText(SENDER, 'Remitente copiado'); return; }
+    if (a === 'paste-add') { importText(val('f-paste'), 'paste'); return; }
     if (a === 'type') {
       var t = b.getAttribute('data-t') === 'c' ? 'c' : 'd';
       sheet.type = t;
@@ -1060,7 +968,6 @@ svg { display: block; }
     ev.preventDefault();
     if (!sheet || busy) return;
     if (sheet.mode === 'adjust') saveAdjust();
-    else if (sheet.mode === 'gmail') connectGmail();
     else if (sheet.mode === 'add' || sheet.mode === 'edit') saveMove();
   });
 
@@ -1080,7 +987,10 @@ svg { display: block; }
     }
   });
 
-  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && sheet && !busy && !sheet.testing) closeSheet(); });
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && sheet && !busy) closeSheet();
+    else if ((ev.key === 'Enter' || ev.key === ' ') && ev.target && ev.target.id === 'f-pick') { ev.preventDefault(); fileIn.click(); }
+  });
   if (window.visualViewport) {
     window.visualViewport.addEventListener('resize', fitSheet);
     window.visualViewport.addEventListener('scroll', fitSheet);
@@ -1094,9 +1004,9 @@ svg { display: block; }
     if (a === 'add') openSheet('add');
     else if (a === 'edit') openSheet('edit', b.getAttribute('data-id'));
     else if (a === 'adjust') openSheet('adjust');
-    else if (a === 'paste') openSheet('paste');
-    else if (a === 'gmail') openSheet('gmail');
-    else if (a === 'sync') syncGmail(true);
+    else if (a === 'guide') openSheet('guide');
+    else if (a === 'mail-sheet') openSheet('mail');
+    else if (a === 'mail') { if (prefs.linked) fileIn.click(); else openSheet('mail'); }
     else if (a === 'order') { prefs.order = prefs.order === 'desc' ? 'asc' : 'desc'; savePrefs(); render(); }
     else if (a === 'filter') { filter = b.getAttribute('data-f'); shown = PAGE; render(); }
     else if (a === 'more') { shown += PAGE; render(); }
@@ -1178,9 +1088,6 @@ svg { display: block; }
   if (!loading) loadLocal();
   render();
   connect();
-  if (canSync && prefs.url) syncGmail(false);
-  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') autoSync(); });
-  window.addEventListener('online', function () { if (syncErr) autoSync(); });
 
   if (!hasHost && 'serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
     window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
