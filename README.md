@@ -98,4 +98,4 @@ El saldo que se muestra es el saldo ajustado más los movimientos posteriores a 
 
 ## Icono
 
-El icono es un diseño propio: un abanico dorado sobre fondo ciruela. No reproduce logotipos del banco, que pertenecen a sus dueños.
+El icono es un diseño propio: un sobre del que asoma una moneda dorada, sobre fondo ciruela. Representa el aviso del banco convertido en movimiento. No reproduce logotipos del banco, que pertenecen a sus dueños.
