@@ -1,0 +1,17 @@
+{
+  "name": "FAN",
+  "short_name": "FAN",
+  "description": "Registro personal de los movimientos y el saldo de la cuenta, con las compras leídas de los avisos del banco.",
+  "lang": "es-CL",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#5a1f6b",
+  "theme_color": "#5a1f6b",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -1,0 +1,1099 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>FAN</title>
+<!--STANDALONE:START-->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="FAN">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f3f1f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#130d18" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<!--STANDALONE:END-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
+<style>
+/* Concepto: una cartola de bolsillo. Arriba el saldo, en una tarjeta ciruela con el abanico dorado;
+   debajo las dos acciones (traer compras de Mail, anotar un depósito) y el listado de movimientos,
+   cada uno con el saldo que dejó. Ciruela como acento, dorado solo en el abanico, verde solo para el dinero que entra. */
+:root {
+  --bg: #f3f1f5;
+  --surface: #ffffff;
+  --ink: #1d1424;
+  --muted: #645a6e;
+  --line: #dcd6e2;
+  --track: #e9e4ee;
+  --accent: #6b2a7a;
+  --accent-bg: #f0e3f4;
+  --on-accent: #ffffff;
+  --in: #17713a;
+  --in-bg: #e0f2e6;
+  --over: #b42318;
+  --over-bg: #fdecea;
+  --card-a: #873a9c;
+  --card-b: #34113f;
+  --card-shade: rgba(28, 6, 36, 0.4);
+  --on-card: #ffffff;
+  --on-card-muted: rgba(255, 255, 255, 0.82);
+  --on-card-line: rgba(255, 255, 255, 0.24);
+  --gold: #ffb83d;
+  --gold-soft: #ffe2a6;
+  --scrim: rgba(20, 10, 26, 0.5);
+  --font-display: "Familjen Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #130d18;
+    --surface: #1e1626;
+    --ink: #efe9f4;
+    --muted: #a99db5;
+    --line: #35293f;
+    --track: #2a2033;
+    --accent: #dba8ea;
+    --accent-bg: #3a2247;
+    --on-accent: #2a0c33;
+    --in: #74d394;
+    --in-bg: #173322;
+    --over: #ff9b92;
+    --over-bg: #3b1f1d;
+    --card-a: #7a3190;
+    --card-b: #2b0e35;
+    --card-shade: rgba(14, 3, 20, 0.5);
+    --on-card: #ffffff;
+    --on-card-muted: rgba(255, 255, 255, 0.82);
+    --on-card-line: rgba(255, 255, 255, 0.22);
+    --gold: #ffb83d;
+    --gold-soft: #ffe2a6;
+    --scrim: rgba(0, 0, 0, 0.64);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #130d18;
+  --surface: #1e1626;
+  --ink: #efe9f4;
+  --muted: #a99db5;
+  --line: #35293f;
+  --track: #2a2033;
+  --accent: #dba8ea;
+  --accent-bg: #3a2247;
+  --on-accent: #2a0c33;
+  --in: #74d394;
+  --in-bg: #173322;
+  --over: #ff9b92;
+  --over-bg: #3b1f1d;
+  --card-a: #7a3190;
+  --card-b: #2b0e35;
+  --card-shade: rgba(14, 3, 20, 0.5);
+  --on-card: #ffffff;
+  --on-card-muted: rgba(255, 255, 255, 0.82);
+  --on-card-line: rgba(255, 255, 255, 0.22);
+  --gold: #ffb83d;
+  --gold-soft: #ffe2a6;
+  --scrim: rgba(0, 0, 0, 0.64);
+  color-scheme: dark;
+}
+html.lock { overflow: hidden; }
+[hidden]:not([hidden=until-found i]) { display: none !important; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.4;
+  padding-inline: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+.app { max-width: 480px; margin: 0 auto; padding-block: 20px 40px; display: flex; flex-direction: column; gap: 18px; }
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible, label.btn:focus-within { outline: 3px solid var(--ink); outline-offset: 2px; }
+h1, h2, h3 { margin: 0; font-family: var(--font-display); letter-spacing: -0.01em; text-wrap: balance; }
+.eyebrow { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.muted { color: var(--muted); margin: 0; }
+svg { display: block; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
+
+/* Encabezado */
+.top { display: flex; align-items: center; gap: 12px; }
+.mark { width: 44px; height: 44px; border-radius: 14px; background: var(--accent-bg); color: var(--accent); display: grid; place-items: center; flex: none; }
+.top h1 { font-size: 28px; font-weight: 700; line-height: 1.1; }
+
+/* Botones */
+.btn {
+  min-height: 52px; padding: 0 18px; border-radius: 14px; border: 1.5px solid transparent; box-sizing: border-box;
+  font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-align: center; cursor: pointer;
+}
+.btn:active { opacity: 0.85; }
+.btn:disabled { opacity: 0.45; cursor: default; }
+.btn.primary { background: var(--accent); color: var(--on-accent); }
+.btn.tonal { background: var(--accent-bg); color: var(--accent); }
+.btn.ghost { background: transparent; border-color: var(--line); color: var(--ink); }
+.btn.danger { background: transparent; border-color: var(--over); color: var(--over); }
+.btn.danger.armed { background: var(--over); color: var(--bg); }
+.btn.small { min-height: 44px; padding: 0 14px; font-size: 15px; }
+.btn.block { width: 100%; }
+.btn.big { min-height: 58px; font-size: 16px; border-radius: 16px; padding: 0 12px; }
+.linkbtn { background: none; border: 0; padding: 0 6px; min-height: 44px; color: var(--accent); font-weight: 600; font-size: 15px; text-decoration: underline; text-underline-offset: 3px; align-self: center; }
+
+/* Saldo: la tarjeta */
+.hero {
+  position: relative; overflow: hidden; border-radius: 24px; padding: 18px 20px 18px;
+  background: linear-gradient(135deg, var(--card-a), var(--card-b)); color: var(--on-card);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.hero-fan { position: absolute; right: -34px; bottom: -22px; width: 230px; height: auto; opacity: 0.2; pointer-events: none; color: var(--gold); }
+.hero > *:not(.hero-fan) { position: relative; z-index: 1; }
+.hero-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 40px; }
+.hero .eyebrow { color: var(--on-card-muted); }
+.hero-btn {
+  min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--on-card-line); background: transparent;
+  color: var(--on-card); font-weight: 600; font-size: 14px; flex: none;
+}
+.hero-btn:active { opacity: 0.8; }
+.hero-btn:focus-visible { outline-color: var(--on-card); }
+.total {
+  font-family: var(--font-display); font-weight: 700; line-height: 1; letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums; overflow-wrap: anywhere; margin: 2px 0;
+}
+.total.xl { font-size: min(60px, 15.5vw); }
+.total.lg { font-size: min(50px, 13vw); }
+.total.md { font-size: min(42px, 11vw); }
+.total.sm { font-size: min(34px, 9vw); }
+.total.word { font-size: min(34px, 9vw); letter-spacing: -0.02em; }
+.hero-note { margin: 0; font-size: 15px; font-weight: 500; color: var(--on-card-muted); }
+.hero-note.warn { color: var(--gold-soft); }
+.hero-cta { align-self: flex-start; min-height: 46px; padding: 0 18px; border-radius: 14px; border: 0; background: var(--gold); color: #2b0e35; font-weight: 700; margin-top: 4px; }
+.hero-stats { margin: 6px 0 0; padding-top: 12px; border-top: 1px solid var(--on-card-line); display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.hero-stats div { min-width: 0; }
+.hero-stats dt { font-size: 13px; color: var(--on-card-muted); }
+.hero-stats dd { margin: 2px 0 0; font-weight: 700; font-size: 17px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+
+/* Acciones principales */
+.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.actions .btn { min-width: 0; }
+.under { display: flex; justify-content: center; margin-top: -10px; }
+
+/* Primeros pasos */
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.step {
+  width: 100%; text-align: left; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 12px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px 12px 12px; min-height: 64px;
+}
+.step:active { background: var(--track); }
+.step-n { width: 34px; height: 34px; border-radius: 999px; background: var(--accent-bg); color: var(--accent); display: grid; place-items: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+.step.done .step-n { background: var(--in-bg); color: var(--in); }
+.step-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.step-t b { font-weight: 600; }
+.step-t span { font-size: 14px; color: var(--muted); }
+
+/* Listado */
+.sec-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.sec-head h2 { font-size: 22px; }
+.sec-head .btn { flex: none; white-space: nowrap; }
+.chips { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.chip { min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1.5px solid var(--line); background: transparent; font-weight: 600; font-size: 15px; color: var(--muted); }
+.chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.row {
+  width: 100%; text-align: left; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 10px 14px 10px 10px; min-height: 62px;
+}
+.row:active { background: var(--track); }
+.row.old { background: transparent; }
+.ico { width: 38px; height: 38px; border-radius: 999px; background: var(--track); color: var(--muted); display: grid; place-items: center; flex: none; }
+.ico.in { background: var(--in-bg); color: var(--in); }
+.info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.store { font-weight: 600; overflow-wrap: anywhere; }
+.meta { font-size: 14px; color: var(--muted); }
+.tag { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: var(--accent-bg); color: var(--accent); font-size: 12px; font-weight: 700; vertical-align: 1px; }
+.nums { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.amt { font-weight: 700; font-size: 17px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.amt.in { color: var(--in); }
+.run { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.anchor { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; font-weight: 600; text-align: center; padding: 4px 2px; }
+.anchor::before, .anchor::after { content: ""; flex: 1; min-width: 12px; border-top: 1.5px dashed var(--line); }
+.anchor span { min-width: 0; }
+.empty { margin: 0; padding: 16px; border: 1.5px dashed var(--line); border-radius: 16px; color: var(--muted); }
+.more { margin-top: 10px; }
+.foot { margin: 0; font-size: 13px; color: var(--muted); text-align: center; }
+
+/* Datos y respaldo */
+.backup { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 4px 16px; }
+.backup summary { min-height: 48px; display: flex; align-items: center; font-weight: 600; cursor: pointer; }
+.backup[open] { padding-bottom: 16px; }
+.backup > *:not(summary) { margin-top: 10px; }
+.backup textarea, .field textarea { width: 100%; box-sizing: border-box; border: 1.5px solid var(--line); border-radius: 12px; background: var(--bg); padding: 10px 12px; font-size: 14px; resize: vertical; }
+.backup textarea { font-family: ui-monospace, Menlo, monospace; }
+.bk-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.bk-actions .btn { flex: 1; min-width: 0; min-height: 48px; }
+
+/* Hojas */
+.sheet { position: fixed; inset: 0; z-index: 10; display: flex; align-items: flex-end; justify-content: center; }
+.backdrop { position: absolute; inset: 0; background: var(--scrim); }
+.panel {
+  position: relative; width: 100%; max-width: 480px; max-height: 94%; overflow-y: auto; overscroll-behavior: contain;
+  background: var(--surface); border-radius: 24px 24px 0 0; box-sizing: border-box;
+  padding: 22px 16px calc(22px + env(safe-area-inset-bottom, 0px));
+  display: flex; flex-direction: column; gap: 16px; animation: rise 0.2s ease-out;
+}
+.panel:focus { outline: none; }
+.panel h2 { font-size: 24px; }
+.panel .sub { margin: -8px 0 0; color: var(--muted); font-size: 15px; }
+.panel .sub strong, .note strong { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.field { display: flex; flex-direction: column; gap: 6px; border: 0; padding: 0; margin: 0; min-width: 0; }
+.field > span { font-size: 14px; font-weight: 600; padding: 0; }
+.field input[type="date"], .field input[type="time"], .field input[type="text"] {
+  display: block; width: 100%; min-width: 0; min-height: 52px; box-sizing: border-box;
+  -webkit-appearance: none; appearance: none; font-size: 16px;
+  border: 1.5px solid var(--line); border-radius: 12px; padding: 0 14px; background: var(--bg); color: var(--ink);
+}
+.field textarea { font-size: 16px; min-height: 104px; }
+.pair { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 10px; }
+.price-wrap { position: relative; }
+.price-wrap b { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-weight: 600; pointer-events: none; }
+.price-wrap input { padding-left: 30px !important; font-variant-numeric: tabular-nums; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 5px; border-radius: 16px; background: var(--track); }
+.seg button { min-height: 44px; border-radius: 12px; border: 0; background: transparent; font-weight: 600; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); }
+.err { margin: 0; padding: 10px 12px; border-radius: 12px; background: var(--over-bg); color: var(--over); font-weight: 600; font-size: 15px; }
+.note { margin: 0; padding: 10px 12px; border-radius: 12px; background: var(--accent-bg); color: var(--ink); font-size: 14px; }
+.stack { display: flex; flex-direction: column; gap: 10px; }
+.or { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+.or::before, .or::after { content: ""; flex: 1; border-top: 1px solid var(--line); }
+.found { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.found li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 10px 12px; border-radius: 12px; background: var(--bg); font-size: 15px; }
+.found li b { font-weight: 600; overflow-wrap: anywhere; }
+.found li i { font-style: normal; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.found li span { grid-column: 1 / -1; font-size: 13px; color: var(--muted); }
+.guide { margin: 0; padding: 0; list-style: none; counter-reset: paso; display: flex; flex-direction: column; gap: 12px; }
+.guide li { counter-increment: paso; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; font-size: 15px; }
+.guide li::before { content: counter(paso); width: 28px; height: 28px; border-radius: 999px; background: var(--accent-bg); color: var(--accent); display: grid; place-items: center; font-weight: 700; font-size: 14px; }
+.guide li > div { min-width: 0; overflow-wrap: anywhere; }
+.guide strong { font-weight: 600; }
+.mono { font-family: ui-monospace, Menlo, monospace; font-size: 14px; background: var(--track); padding: 1px 6px; border-radius: 6px; overflow-wrap: anywhere; }
+@keyframes rise { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .panel { animation: none; } }
+
+.toast {
+  position: fixed; left: 16px; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); max-width: 448px; margin: 0 auto; z-index: 20;
+  background: var(--ink); color: var(--bg); padding: 8px 16px; min-height: 48px; box-sizing: border-box; border-radius: 14px; font-size: 15px;
+  display: flex; align-items: center; justify-content: center; gap: 14px; text-align: center;
+}
+.toast.top { bottom: auto; top: calc(12px + env(safe-area-inset-top, 0px)); }
+.toast button { background: none; border: 0; padding: 0 4px; min-height: 44px; color: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; flex: none; }
+</style>
+</head>
+<body>
+
+<main class="app" id="app"></main>
+<div class="sheet" id="sheet" hidden></div>
+<div class="toast" id="toast" role="status" hidden></div>
+<input class="vh" type="file" id="file-in" accept=".txt,.text,text/plain" tabindex="-1" aria-hidden="true">
+
+<script>
+(function () {
+  'use strict';
+
+  var MES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  var MESL = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  var LS_KEY = 'fan-movimientos';
+  var LS_CFG = 'fan-cuenta';
+  var LS_PREFS = 'fan-preferencias';
+  var COL = 'movimientos';
+  var CFG_PATH = 'cuenta/saldo';
+  var DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+  var TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+  var AT_RE = /^\d{4}-\d{2}-\d{2}T([01]\d|2[0-3]):[0-5]\d$/;
+  var MAX_AMOUNT = 9999999999;
+  var MAX_IGNORED = 400;
+  var PAGE = 80;
+  var SENDER = 'enviodigital@bancochile.cl';
+  var FILE_NAME = 'fan.txt';
+
+  var FAN = '<path d="M7.90 17.11L-1.90 12.12A15.60 15.60 0 0 1 1.56 7.61L8.92 15.78A4.60 4.60 0 0 0 7.90 17.11Z" fill="currentColor"/><path d="M8.92 15.78L1.56 7.61A15.60 15.60 0 0 1 6.41 4.64L10.35 14.91A4.60 4.60 0 0 0 8.92 15.78Z" fill="currentColor" opacity="0.5"/><path d="M10.35 14.91L6.41 4.64A15.60 15.60 0 0 1 12.00 3.60L12.00 14.60A4.60 4.60 0 0 0 10.35 14.91Z" fill="currentColor"/><path d="M12.00 14.60L12.00 3.60A15.60 15.60 0 0 1 17.59 4.64L13.65 14.91A4.60 4.60 0 0 0 12.00 14.60Z" fill="currentColor" opacity="0.5"/><path d="M13.65 14.91L17.59 4.64A15.60 15.60 0 0 1 22.44 7.61L15.08 15.78A4.60 4.60 0 0 0 13.65 14.91Z" fill="currentColor"/><path d="M15.08 15.78L22.44 7.61A15.60 15.60 0 0 1 25.90 12.12L16.10 17.11A4.60 4.60 0 0 0 15.08 15.78Z" fill="currentColor" opacity="0.5"/><circle cx="12" cy="19.2" r="2.2" fill="currentColor"/>';
+  var I_FAN = '<svg viewBox="-3 2.4 30 20" width="30" height="20" aria-hidden="true">' + FAN + '</svg>';
+  var I_FAN_BG = '<svg class="hero-fan" viewBox="-3 2.4 30 20" aria-hidden="true">' + FAN + '</svg>';
+  var I_PLUS = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>';
+  var I_MAIL = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13.5" rx="2.8" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M4 8l8 5.6L20 8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var I_SORT = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M8 5v14M8 19l-3.5-3.5M8 19l3.5-3.5M16 19V5M16 5l-3.5 3.5M16 5l3.5 3.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var I_BAG = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5.5 8.5h13l-.9 11h-11.2l-.9-11z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 8.5V7a3 3 0 0 1 6 0v1.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+  var I_IN = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 4v11M12 15l-4.2-4.2M12 15l4.2-4.2M5 19.5h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var I_OUT = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 15V4M12 4L7.8 8.2M12 4l4.2 4.2M5 19.5h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var I_CHECK = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  var app = document.getElementById('app');
+  var sheetEl = document.getElementById('sheet');
+  var toastEl = document.getElementById('toast');
+  var fileIn = document.getElementById('file-in');
+
+  var items = [];                                   // movimientos, del más antiguo al más reciente
+  var cfg = { amount: 0, at: '', ignored: [] };     // saldo ajustado, cuándo, y avisos de Mail descartados
+  var prefs = { order: 'desc', linked: false };     // preferencias de este dispositivo
+  var filter = 'all';                               // 'all' | 'c' compras y gastos | 'd' depósitos
+  var shown = PAGE;
+  var fresh = {};                                   // movimientos recién traídos, para marcarlos como nuevos
+  var hasHost = !!(window.claude && window.claude.use);
+  var loading = hasHost;
+  var gotItems = false, gotCfg = false;
+  var mode = 'local';
+  var db = null;
+  var sheet = null;
+  var busy = false;
+  var restoreArmed = false;
+  var wipeArmed = false;
+
+  /* ---------- Fechas y formatos ---------- */
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function todayKey() { return dayKey(new Date()); }
+  function nowTime() { var d = new Date(); return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+  function validDate(k) {
+    if (!DATE_RE.test(String(k))) return false;
+    var p = k.split('-'), d = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2]));
+    return d.getUTCFullYear() === +p[0] && d.getUTCMonth() === +p[1] - 1 && d.getUTCDate() === +p[2];
+  }
+  function fmt(k) {
+    var p = k.split('-');
+    return (+p[2]) + ' ' + MES[+p[1] - 1] + (p[0] === todayKey().slice(0, 4) ? '' : ' ' + p[0]);
+  }
+  function dayLabel(k) {
+    var t = new Date(), y = new Date(t.getFullYear(), t.getMonth(), t.getDate() - 1);
+    if (k === dayKey(t)) return 'Hoy';
+    if (k === dayKey(y)) return 'Ayer';
+    return fmt(k);
+  }
+  function fmtAt(at) { return fmt(at.slice(0, 10)) + ', ' + at.slice(11); }
+  function dots(n) { return String(Math.round(Math.abs(n))).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+  function money(n) { return (n < 0 ? '−' : '') + '$' + dots(n); }
+  function plural(n, s, p) { return n === 1 ? s : p; }
+  function genId() { return 'x' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  function clean(s) { return String(s == null ? '' : s).replace(/\s+/g, ' ').trim().slice(0, 60); }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
+  }
+  function hash(s) {
+    var a = 2166136261, b = 5381;
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charCodeAt(i);
+      a = Math.imul(a ^ c, 16777619) >>> 0;
+      b = (Math.imul(b, 33) + c) >>> 0;
+    }
+    return a.toString(36) + b.toString(36);
+  }
+
+  /* ---------- Lector de los avisos del banco ---------- */
+  // Formato del aviso: "Te informamos que se ha realizado una compra por $1.380 con cargo a Cuenta ****0000
+  // en COMERCIO el 07/10/2026 13:04." El texto puede venir con etiquetas HTML, saltos de línea o varios avisos seguidos.
+  function plainText(s) {
+    s = String(s == null ? '' : s);
+    if (s.length > 4000000) s = s.slice(-4000000);
+    if (/<[a-z!\/][^>]*>/i.test(s)) s = s.replace(/<(script|style)\b[\s\S]*?<\/\1>/gi, ' ').replace(/<[^>]+>/g, ' ');
+    if (/&[#a-z0-9]+;/i.test(s)) { var t = document.createElement('textarea'); t.innerHTML = s; s = t.value; }
+    return s.replace(/[\s ​‌‍﻿]+/g, ' ');
+  }
+  function parseMail(raw) {
+    var text = plainText(raw);
+    var re = /compra\s+por\s+(US\$|USD|\$)?\s?([\d.]+(?:,\d{1,2})?)\s+con\s+(?:cargo\s+a\s+)?(.{1,60}?)\s+en\s+(.{1,80}?)\s+el\s+(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})/gi;
+    var out = { found: [], credit: 0, foreign: 0 }, seen = {}, m;
+    while ((m = re.exec(text))) {
+      var cur = (m[1] || '$').toUpperCase(), medio = m[3], merchant = clean(m[4]);
+      var amount = parseInt(m[2].replace(/\./g, '').replace(/,.*$/, ''), 10);
+      var date = m[7] + '-' + pad(+m[6]) + '-' + pad(+m[5]), time = pad(+m[8]) + ':' + m[9];
+      if (!validDate(date) || !TIME_RE.test(time) || !merchant || !(amount > 0) || amount > MAX_AMOUNT) continue;
+      if (cur !== '$') { out.foreign++; continue; }
+      if (/cr[eé]dito/i.test(medio)) { out.credit++; continue; }
+      var key = date + 'T' + time + '|' + amount + '|' + merchant.toUpperCase();
+      if (seen[key]) continue;
+      seen[key] = 1;
+      var acct = (/(\d{4})\s*$/.exec(medio) || [])[1] || '';
+      out.found.push({ date: date, time: time, amount: amount, merchant: merchant, acct: acct, key: key });
+    }
+    return out;
+  }
+
+  /* ---------- Datos ---------- */
+  function norm(p) {
+    if (!p) return null;
+    var date = validDate(String(p.date)) ? String(p.date) : null;
+    var amount = Math.round(+p.amount);
+    if (!date || !(amount > 0) || amount > MAX_AMOUNT) return null;
+    var type = p.type === 'd' ? 'd' : 'c';
+    var src = p.src === 'mail' ? 'mail' : 'manual';
+    return {
+      id: String(p.id || '').replace(/[^\w-]/g, '') || genId(),
+      type: type,
+      date: date,
+      time: TIME_RE.test(String(p.time)) ? String(p.time) : '12:00',
+      desc: clean(p.desc) || (type === 'd' ? 'Depósito' : src === 'mail' ? 'Compra' : 'Gasto'),
+      amount: amount,
+      src: src,
+      key: src === 'mail' ? String(p.key || '').slice(0, 180) : '',
+      acct: /^\d{4}$/.test(String(p.acct || '')) ? String(p.acct) : '',
+      ts: +p.ts > 0 ? +p.ts : 0
+    };
+  }
+  function toDoc(m) { return { type: m.type, date: m.date, time: m.time, desc: m.desc, amount: m.amount, src: m.src, key: m.key, acct: m.acct, ts: m.ts }; }
+  function normCfg(c) {
+    c = c || {};
+    var amount = Math.round(+c.amount), at = AT_RE.test(String(c.at)) && validDate(String(c.at).slice(0, 10)) ? String(c.at) : '';
+    var ign = Array.isArray(c.ignored) ? c.ignored.filter(function (k) { return typeof k === 'string' && k; }).slice(-MAX_IGNORED) : [];
+    return { amount: at && amount >= 0 && amount <= MAX_AMOUNT ? amount : 0, at: at, ignored: ign };
+  }
+  function sortItems() {
+    items.sort(function (a, b) {
+      if (a.date !== b.date) return a.date < b.date ? -1 : 1;
+      if (a.time !== b.time) return a.time < b.time ? -1 : 1;
+      if (a.ts !== b.ts) return a.ts - b.ts;
+      return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+    });
+  }
+  function find(id) { for (var i = 0; i < items.length; i++) if (items[i].id === id) return items[i]; return null; }
+  function dtOf(m) { return m.date + 'T' + m.time; }
+  function sign(m) { return m.type === 'd' ? m.amount : -m.amount; }
+
+  // Saldo = saldo ajustado + movimientos desde el ajuste. Lo anterior al ajuste queda como historial.
+  function compute() {
+    var bal = cfg.at ? cfg.amount : 0, rows = [], since = 0, mk = todayKey().slice(0, 7), mc = 0, md = 0;
+    items.forEach(function (m) {
+      var counts = !!cfg.at && dtOf(m) >= cfg.at, run = null;
+      if (counts) { bal += sign(m); run = bal; since++; }
+      if (m.date.slice(0, 7) === mk) { if (m.type === 'd') md += m.amount; else mc += m.amount; }
+      rows.push({ m: m, counts: counts, run: run });
+    });
+    return { balance: bal, rows: rows, since: since, monthC: mc, monthD: md };
+  }
+
+  function loadLocal() {
+    var list = [];
+    try {
+      var raw = localStorage.getItem(LS_KEY);
+      if (raw) JSON.parse(raw).forEach(function (p) { var n = norm(p); if (n) list.push(n); });
+    } catch (e) {}
+    items = list; sortItems();
+    try { cfg = normCfg(JSON.parse(localStorage.getItem(LS_CFG) || 'null')); } catch (e) { cfg = normCfg(null); }
+  }
+  function saveLocal() {
+    try { localStorage.setItem(LS_KEY, JSON.stringify(items)); localStorage.setItem(LS_CFG, JSON.stringify(cfg)); } catch (e) {}
+  }
+  function loadPrefs() {
+    try {
+      var p = JSON.parse(localStorage.getItem(LS_PREFS) || 'null') || {};
+      prefs.order = p.order === 'asc' ? 'asc' : 'desc';
+      prefs.linked = !!p.linked;
+    } catch (e) {}
+  }
+  function savePrefs() { try { localStorage.setItem(LS_PREFS, JSON.stringify(prefs)); } catch (e) {} }
+
+  // Descripciones ya usadas en movimientos manuales, para sugerirlas al escribir
+  function descOptions(type) {
+    var seen = {}, out = [];
+    for (var i = items.length - 1; i >= 0 && out.length < 30; i--) {
+      var m = items[i];
+      if (m.src !== 'manual' || m.type !== type) continue;
+      var k = m.desc.toLowerCase();
+      if (!seen[k]) { seen[k] = 1; out.push(m.desc); }
+    }
+    return out;
+  }
+
+  async function commit(ups, rems, newCfg) {
+    ups = ups || []; rems = rems || [];
+    var next = items.filter(function (p) { return rems.indexOf(p.id) < 0 && !ups.some(function (u) { return u.id === p.id; }); }).concat(ups);
+    if (mode === 'db' && db) {
+      try {
+        for (var i = 0; i < ups.length; i++) await db.collection(COL).doc(ups[i].id).set(toDoc(ups[i]));
+        for (var j = 0; j < rems.length; j++) await db.collection(COL).doc(rems[j]).delete();
+        if (newCfg) await db.doc(CFG_PATH).set({ amount: newCfg.amount, at: newCfg.at, ignored: newCfg.ignored });
+      } catch (e) { toast('No se pudo guardar. Intenta de nuevo.'); return false; }
+    }
+    items = next; sortItems();
+    if (newCfg) cfg = newCfg;
+    if (mode !== 'db') saveLocal();
+    render();
+    return true;
+  }
+
+  function toast(msg, actLabel, actFn, ms) {
+    toastEl.textContent = '';
+    var s = document.createElement('span');
+    s.textContent = msg;
+    toastEl.appendChild(s);
+    if (actLabel) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = actLabel;
+      b.addEventListener('click', function () { toastEl.hidden = true; clearTimeout(toast.t); actFn(); });
+      toastEl.appendChild(b);
+    }
+    toastEl.classList.toggle('top', !!sheet);
+    toastEl.hidden = false;
+    clearTimeout(toast.t);
+    toast.t = setTimeout(function () { toastEl.hidden = true; }, ms || 3600);
+  }
+
+  function copyText(text, okMsg) {
+    function legacy() {
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed'; ta.style.opacity = '0'; ta.style.left = '0'; ta.style.top = '0';
+      document.body.appendChild(ta); ta.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta);
+      toast(ok ? okMsg : 'No se pudo copiar en este dispositivo');
+    }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { toast(okMsg); }, legacy);
+      else legacy();
+    } catch (e) { legacy(); }
+  }
+
+  /* ---------- Traer compras: archivo de Atajos o texto pegado ---------- */
+  function pending(parsed, source) {
+    var have = {}, ign = {}, ups = [], known = 0, back = [];
+    items.forEach(function (m) { if (m.key) have[m.key] = 1; });
+    cfg.ignored.forEach(function (k) { ign[k] = 1; });
+    parsed.found.forEach(function (p) {
+      if (have[p.key]) { known++; return; }
+      if (ign[p.key]) {
+        if (source === 'file') { known++; return; }   // se eliminó a propósito: el archivo no la devuelve
+        back.push(p.key);                              // pegarla a mano sí la recupera
+      }
+      ups.push({ id: 'm' + hash(p.key), type: 'c', date: p.date, time: p.time, desc: p.merchant, amount: p.amount, src: 'mail', key: p.key, acct: p.acct, ts: Date.now() });
+    });
+    return { ups: ups, known: known, back: back };
+  }
+  function skippedNote(parsed) {
+    var parts = [];
+    if (parsed.credit) parts.push(parsed.credit + ' de tarjeta de crédito');
+    if (parsed.foreign) parts.push(parsed.foreign + ' en dólares');
+    return parts.length ? ' Sin contar: ' + parts.join(' y ') + '.' : '';
+  }
+  async function importText(text, source) {
+    if (busy) return;
+    var parsed = parseMail(text), n = parsed.found.length;
+    if (!n) {
+      var why = parsed.credit || parsed.foreign
+        ? 'Solo encontré compras que no son de la cuenta.' + skippedNote(parsed)
+        : source === 'file' ? 'Ese archivo no tiene avisos de compra del banco.' : 'No reconozco un aviso de compra en ese texto.';
+      if (sheet && sheet.mode === 'mail') setErr(why); else toast(why, 'Ver guía', function () { openSheet('guide'); }, 6000);
+      return;
+    }
+    if (source === 'file' && !prefs.linked) { prefs.linked = true; savePrefs(); }
+    var res = pending(parsed, source), k = res.ups.length;
+    if (!k) {
+      if (sheet) closeSheet();
+      render();
+      toast(n === 1 ? 'Esa compra ya estaba registrada.' : 'Sin compras nuevas: las ' + n + ' del archivo ya estaban.');
+      return;
+    }
+    var newCfg = res.back.length ? { amount: cfg.amount, at: cfg.at, ignored: cfg.ignored.filter(function (x) { return res.back.indexOf(x) < 0; }) } : null;
+    busy = true;
+    var ok = await commit(res.ups, [], newCfg);
+    busy = false;
+    if (!ok) return;
+    fresh = {};
+    res.ups.forEach(function (u) { fresh[u.id] = 1; });
+    filter = 'all'; shown = PAGE;
+    if (sheet) closeSheet();
+    render();
+    var sum = 0, old = 0;
+    res.ups.forEach(function (u) { sum += u.amount; if (cfg.at && dtOf(u) < cfg.at) old++; });
+    var msg = k + ' ' + plural(k, 'compra nueva', 'compras nuevas') + ' · ' + money(sum) + '.';
+    if (old) msg += ' ' + old + plural(old, ' es anterior', ' son anteriores') + ' al ajuste de saldo y no lo ' + plural(old, 'cambia', 'cambian') + '.';
+    toast(msg + skippedNote(parsed), null, null, 5200);
+  }
+  function readFile(f) {
+    if (f.text) return f.text();
+    return new Promise(function (res, rej) {
+      var r = new FileReader();
+      r.onload = function () { res(String(r.result || '')); };
+      r.onerror = rej;
+      r.readAsText(f);
+    });
+  }
+  fileIn.addEventListener('change', function () {
+    var f = fileIn.files && fileIn.files[0];
+    if (!f) return;
+    if (f.size > 8 * 1024 * 1024) { fileIn.value = ''; toast('Ese archivo es demasiado grande para ser el de Atajos.'); return; }
+    readFile(f).then(function (text) { fileIn.value = ''; importText(text, 'file'); }, function () { fileIn.value = ''; toast('No se pudo leer el archivo.'); });
+  });
+
+  /* ---------- Vistas ---------- */
+  function header() {
+    return '<header class="top"><span class="mark">' + I_FAN + '</span><div><div class="eyebrow">Cuenta · registro personal</div><h1>FAN</h1></div></header>';
+  }
+
+  function hero(c) {
+    var h = '<section class="hero" aria-label="Saldo de la cuenta">' + I_FAN_BG + '<div class="hero-top"><span class="eyebrow">Saldo de la cuenta</span>';
+    if (!loading && cfg.at) h += '<button class="hero-btn" data-act="adjust">Ajustar</button>';
+    h += '</div>';
+    if (loading) {
+      h += '<div class="total word">Cargando…</div><p class="hero-note">Buscando tus movimientos.</p>';
+    } else if (!cfg.at) {
+      h += '<div class="total word">Sin definir</div>' +
+        '<p class="hero-note">Escribe el saldo que muestra hoy tu banco. Desde ahí, las compras lo descuentan y los depósitos lo suman.</p>' +
+        '<button class="hero-cta" data-act="adjust">Definir saldo</button>';
+    } else {
+      var txt = money(c.balance);
+      var size = txt.length <= 8 ? 'xl' : txt.length <= 10 ? 'lg' : txt.length <= 11 ? 'md' : 'sm';
+      h += '<div class="total ' + size + '">' + txt + '</div>';
+      if (c.balance < 0) h += '<p class="hero-note warn">El saldo calculado quedó bajo cero. Revisa si falta un depósito o ajusta el saldo.</p>';
+      else h += '<p class="hero-note">' + (c.since ? c.since + ' ' + plural(c.since, 'movimiento', 'movimientos') + ' desde el ajuste del ' + fmtAt(cfg.at)
+                                                 : 'Ajustado el ' + fmtAt(cfg.at) + ', sin movimientos después') + '</p>';
+    }
+    if (!loading && items.length) {
+      var mes = MESL[new Date().getMonth()];
+      h += '<dl class="hero-stats"><div><dt>Compras de ' + mes + '</dt><dd>' + money(c.monthC) + '</dd></div>' +
+        '<div><dt>Depósitos de ' + mes + '</dt><dd>' + money(c.monthD) + '</dd></div></dl>';
+    }
+    return h + '</section>';
+  }
+
+  function actions() {
+    var h = '<div class="actions"><button class="btn primary big" data-act="mail">' + I_MAIL + 'Traer de Mail</button>' +
+      '<button class="btn ghost big" data-act="add">' + I_PLUS + 'Depósito</button></div>';
+    if (prefs.linked) h += '<div class="under"><button class="linkbtn" data-act="mail-sheet">Pegar un aviso o ver la guía</button></div>';
+    return h;
+  }
+
+  function startBlock() {
+    function step(n, act, done, title, text) {
+      return '<li><button class="step' + (done ? ' done' : '') + '" data-act="' + act + '"><span class="step-n">' + (done ? I_CHECK : n) + '</span>' +
+        '<span class="step-t"><b>' + title + '</b><span>' + text + '</span></span></button></li>';
+    }
+    return '<section aria-label="Primeros pasos"><div class="sec-head"><h2>Primeros pasos</h2></div><ol class="steps">' +
+      step(1, 'adjust', !!cfg.at, 'Define el saldo', 'El que muestra hoy la app del banco.') +
+      step(2, 'guide', prefs.linked, 'Conecta Mail con Atajos', 'Una automatización guarda cada aviso de compra del banco.') +
+      step(3, 'mail-sheet', false, 'Trae tu primera compra', 'Desde el archivo de Atajos, o pegando el texto de un aviso.') +
+      '</ol></section>';
+  }
+
+  function rowHtml(r) {
+    var m = r.m, isIn = m.type === 'd';
+    var icon = isIn ? I_IN : m.src === 'mail' ? I_BAG : I_OUT;
+    var what = isIn ? 'Depósito' : m.src === 'mail' ? 'Compra' : 'Gasto';
+    var amt = (isIn ? '+' : '−') + '$' + dots(m.amount);
+    var meta = dayLabel(m.date) + ' · ' + m.time + (m.src === 'mail' ? ' · Mail' : '') + (multiAcct && m.acct ? ' · ··' + m.acct : '');
+    return '<li><button class="row' + (r.counts || !cfg.at ? '' : ' old') + '" data-act="edit" data-id="' + m.id + '" aria-label="Editar ' + what.toLowerCase() + ': ' + esc(m.desc) + ', ' + amt + ', ' + fmt(m.date) + '">' +
+      '<span class="ico' + (isIn ? ' in' : '') + '">' + icon + '</span>' +
+      '<span class="info"><span class="store">' + esc(m.desc) + (fresh[m.id] ? '<span class="tag">Nueva</span>' : '') + '</span><span class="meta">' + meta + '</span></span>' +
+      '<span class="nums"><span class="amt' + (isIn ? ' in' : '') + '">' + amt + '</span>' + (r.run === null ? '' : '<span class="run">Saldo ' + money(r.run) + '</span>') + '</span></button></li>';
+  }
+
+  var multiAcct = false;
+  function listBlock(c) {
+    var seenAcct = {}, nAcct = 0;
+    items.forEach(function (m) { if (m.acct && !seenAcct[m.acct]) { seenAcct[m.acct] = 1; nAcct++; } });
+    multiAcct = nAcct > 1;
+
+    var h = '<section aria-label="Movimientos"><div class="sec-head"><h2>Movimientos</h2>';
+    if (items.length > 1) h += '<button class="btn ghost small" data-act="order" aria-label="Cambiar el orden del listado">' + I_SORT + (prefs.order === 'desc' ? 'Recientes primero' : 'Antiguos primero') + '</button>';
+    h += '</div>';
+    var nd = 0;
+    items.forEach(function (m) { if (m.type === 'd') nd++; });
+    if (nd && nd < items.length) {
+      h += '<div class="chips" role="group" aria-label="Filtrar movimientos">' +
+        [['all', 'Todos'], ['c', 'Compras'], ['d', 'Depósitos']].map(function (f) {
+          return '<button class="chip" data-act="filter" data-f="' + f[0] + '" aria-pressed="' + (filter === f[0]) + '">' + f[1] + '</button>';
+        }).join('') + '</div>';
+    } else { filter = 'all'; }
+
+    // Lista en orden cronológico, con la marca del ajuste de saldo en su lugar
+    var seq = [], placed = !cfg.at;
+    c.rows.forEach(function (r) {
+      if (!placed && r.counts) { seq.push(null); placed = true; }
+      if (filter === 'all' || r.m.type === filter) seq.push(r);
+    });
+    if (!placed) seq.push(null);
+    if (prefs.order === 'desc') seq.reverse();
+    var total = seq.length, cut = seq.slice(0, shown);
+    h += '<ul class="list">';
+    cut.forEach(function (r) {
+      h += r ? rowHtml(r) : '<li class="anchor"><span>Saldo ajustado a ' + money(cfg.amount) + ' · ' + fmtAt(cfg.at) + '</span></li>';
+    });
+    h += '</ul>';
+    if (total > shown) h += '<button class="btn ghost block more" data-act="more">Ver más movimientos (' + (total - shown) + ')</button>';
+    return h + '</section>';
+  }
+
+  function dataBlock() {
+    var where = mode === 'db' ? 'Los movimientos se guardan en este artefacto de Claude.' : 'Los movimientos se guardan solo en este dispositivo.';
+    return '<details class="backup"><summary>Datos y respaldo</summary>' +
+      '<p class="muted">' + where + ' Copia un respaldo para guardarlo en Notas o llevarlo a otro equipo.</p>' +
+      '<textarea id="bk-text" rows="4" spellcheck="false" aria-label="Texto del respaldo"></textarea>' +
+      '<div class="bk-actions"><button class="btn ghost" data-act="bk-copy">Copiar respaldo</button><button class="btn ghost" data-act="bk-restore">Restaurar desde el texto</button></div>' +
+      '<button class="btn danger block" data-act="wipe"' + (items.length || cfg.at ? '' : ' disabled') + '>Borrar todos los datos</button></details>';
+  }
+
+  function render() {
+    var c = compute();
+    var h = header() + hero(c);
+    if (!loading) {
+      h += actions();
+      h += items.length ? listBlock(c) : startBlock();
+      h += dataBlock();
+    }
+    h += '<p class="foot">Registro personal. No es la app oficial del banco ni está conectada a tu cuenta.</p>';
+    var open = app.querySelector('.backup');
+    var wasOpen = open && open.open, bk = document.getElementById('bk-text'), bkVal = bk ? bk.value : '';
+    app.innerHTML = h;
+    restoreArmed = false; wipeArmed = false;
+    if (wasOpen) { var d = app.querySelector('.backup'); if (d) { d.open = true; document.getElementById('bk-text').value = bkVal; } }
+  }
+
+  /* ---------- Hojas ---------- */
+  function moneyField(id, label, value, hint) {
+    return '<label class="field"><span>' + label + '</span><div class="price-wrap"><b>$</b><input type="text" id="' + id + '" inputmode="numeric" autocomplete="off" enterkeyhint="done" placeholder="' + hint + '" value="' + value + '"></div></label>';
+  }
+  function anchorNote(date, time) {
+    return cfg.at && validDate(date) && TIME_RE.test(time) && date + 'T' + time < cfg.at
+      ? 'Es anterior al último ajuste de saldo (' + fmtAt(cfg.at) + '): queda en el historial y no cambia el saldo.' : '';
+  }
+
+  function sheetMove(s) {
+    var today = todayKey(), p = s.id ? find(s.id) : null;
+    var type = p ? p.type : s.type, mail = !!p && p.src === 'mail';
+    var title = p ? (mail ? 'Compra desde Mail' : type === 'd' ? 'Editar depósito' : 'Editar gasto') : 'Anotar movimiento';
+    var dateV = p ? p.date : (s.keepDate || today), timeV = p ? p.time : nowTime();
+    var opts = mail ? '' : descOptions(type).map(function (x) { return '<option value="' + esc(x) + '"></option>'; }).join('');
+    var note = anchorNote(dateV, timeV);
+    var h = '<form class="panel" id="sheet-form" novalidate role="dialog" aria-modal="true" aria-labelledby="sheet-title" tabindex="-1">' +
+      '<h2 id="sheet-title">' + title + '</h2>';
+    if (mail) h += '<p class="sub">Leída del aviso del banco. Puedes corregirla o darle un nombre más claro.</p>';
+    else h += '<div class="seg" role="group" aria-label="Tipo de movimiento">' +
+      '<button type="button" data-act="type" data-t="d" aria-pressed="' + (type === 'd') + '">Depósito</button>' +
+      '<button type="button" data-act="type" data-t="c" aria-pressed="' + (type === 'c') + '">Gasto</button></div>';
+    h += moneyField('f-amount', 'Monto', p ? dots(p.amount) : '', 'Ej. 150.000') +
+      '<label class="field"><span id="f-desc-label">' + (mail ? 'Comercio' : 'Descripción') + '</span><input type="text" id="f-desc" list="f-descs" maxlength="60" autocomplete="off" autocapitalize="sentences" enterkeyhint="done" placeholder="' +
+      (mail ? 'Nombre del comercio' : type === 'd' ? 'Ej. Sueldo, transferencia recibida' : 'Ej. Giro en cajero, transferencia') + '" value="' + (p ? esc(p.desc) : '') + '"></label>' +
+      '<datalist id="f-descs">' + opts + '</datalist>' +
+      '<div class="pair"><label class="field"><span>Fecha</span><input type="date" id="f-date" value="' + dateV + '" max="' + today + '" required></label>' +
+      '<label class="field"><span>Hora</span><input type="time" id="f-time" value="' + timeV + '" required></label></div>' +
+      '<p class="note" id="f-note"' + (note ? '' : ' hidden') + '>' + note + '</p>' +
+      '<p class="err" id="f-err" role="alert" hidden></p>' +
+      '<div class="stack"><button type="submit" class="btn primary block" id="f-save">' + (p ? 'Guardar cambios' : type === 'd' ? 'Guardar depósito' : 'Guardar gasto') + '</button>' +
+      (p ? '<button type="button" class="btn danger block" data-act="delete">Eliminar movimiento</button>' : '') +
+      '<button type="button" class="btn ghost block" data-act="cancel">Cancelar</button></div></form>';
+    return h;
+  }
+
+  function sheetAdjust() {
+    var c = compute(), first = !cfg.at;
+    return '<form class="panel" id="sheet-form" novalidate role="dialog" aria-modal="true" aria-labelledby="sheet-title" tabindex="-1">' +
+      '<h2 id="sheet-title">' + (first ? 'Definir saldo' : 'Ajustar saldo') + '</h2>' +
+      '<p class="sub">Mira el saldo en la app del banco y escríbelo aquí. Desde este momento, cada compra lo descuenta y cada depósito lo suma.</p>' +
+      moneyField('f-saldo', 'Saldo real de la cuenta ahora', '', 'Ej. 850.000') +
+      (first ? '' : '<p class="note">Saldo calculado por FAN: <strong>' + money(c.balance) + '</strong>. Último ajuste: ' + fmtAt(cfg.at) + '.</p>') +
+      '<p class="err" id="f-err" role="alert" hidden></p>' +
+      '<div class="stack"><button type="submit" class="btn primary block">Guardar saldo</button>' +
+      '<button type="button" class="btn ghost block" data-act="cancel">Cancelar</button></div></form>';
+  }
+
+  function sheetMail() {
+    return '<div class="panel" id="sheet-form" role="dialog" aria-modal="true" aria-labelledby="sheet-title" tabindex="-1">' +
+      '<h2 id="sheet-title">Compras desde Mail</h2>' +
+      '<p class="sub">La app Atajos guarda cada aviso del banco en el archivo <strong>' + FILE_NAME + '</strong>. Elígelo y FAN agrega las compras que falten.</p>' +
+      '<div class="stack"><label class="btn primary block" for="file-in" id="f-pick" tabindex="0" role="button">Elegir ' + FILE_NAME + ' en Archivos</label>' +
+      '<button type="button" class="btn ghost block" data-act="guide">' + (prefs.linked ? 'Ver la guía del atajo' : 'Configurar el atajo (una sola vez)') + '</button></div>' +
+      '<div class="or"><span>o pega un aviso</span></div>' +
+      '<label class="field"><span>Texto del correo del banco</span><textarea id="f-paste" rows="4" autocomplete="off" spellcheck="false" placeholder="Te informamos que se ha realizado una compra por $12.990 con cargo a Cuenta ****0000 en COMERCIO el 01/10/2026 12:30."></textarea></label>' +
+      '<ul class="found" id="f-found" hidden></ul>' +
+      '<p class="err" id="f-err" role="alert" hidden></p>' +
+      '<div class="stack"><button type="button" class="btn tonal block" id="f-paste-add" data-act="paste-add" disabled>Agregar compra</button>' +
+      '<button type="button" class="btn ghost block" data-act="cancel">Cerrar</button></div></div>';
+  }
+
+  function sheetGuide() {
+    return '<div class="panel" id="sheet-form" role="dialog" aria-modal="true" aria-labelledby="sheet-title" tabindex="-1">' +
+      '<h2 id="sheet-title">Conectar Mail con Atajos</h2>' +
+      '<p class="sub">iOS no permite que una app lea tu correo por su cuenta. El puente es la app Atajos: cada vez que Mail recibe un aviso del banco, guarda su texto en un archivo que FAN sabe leer. Se configura una sola vez.</p>' +
+      '<ol class="guide">' +
+      '<li><div>Abre <strong>Atajos</strong>, entra a <strong>Automatización</strong> y toca <strong>+</strong> para crear una nueva.</div></li>' +
+      '<li><div>Elige <strong>Correo electrónico</strong>. En <strong>Remitente</strong> escribe <span class="mono">' + SENDER + '</span></div></li>' +
+      '<li><div>Marca <strong>Ejecutar inmediatamente</strong> y toca <strong>Siguiente</strong>.</div></li>' +
+      '<li><div>Elige <strong>Nueva automatización en blanco</strong> y agrega la acción <strong>Agregar a archivo de texto</strong> (búscala como «archivo de texto»).</div></li>' +
+      '<li><div>En la acción, pon <strong>Entrada del atajo</strong> como texto y <span class="mono">' + FILE_NAME + '</span> como ruta del archivo. Deja la carpeta <strong>Atajos</strong> (Shortcuts) de iCloud Drive.</div></li>' +
+      '<li><div>Toca <strong>OK</strong>. Desde la próxima compra, vuelve a FAN, toca <strong>Traer de Mail</strong> y elige <span class="mono">' + FILE_NAME + '</span> en Archivos → iCloud Drive → Atajos.</div></li>' +
+      '</ol>' +
+      '<p class="note">Los avisos deben llegar a una cuenta configurada en la app Mail del iPhone. Los nombres pueden variar un poco según la versión de iOS. Si algo no calza, siempre puedes copiar el texto del aviso y pegarlo en FAN.</p>' +
+      '<div class="stack"><button type="button" class="btn tonal block" data-act="copy-sender">Copiar el remitente</button>' +
+      '<button type="button" class="btn primary block" data-act="guide-done">Listo</button></div></div>';
+  }
+
+  function renderSheet() {
+    var s = sheet, h = '<div class="backdrop" data-act="cancel"></div>';
+    if (s.mode === 'adjust') h += sheetAdjust();
+    else if (s.mode === 'mail') h += sheetMail();
+    else if (s.mode === 'guide') h += sheetGuide();
+    else h += sheetMove(s);
+    sheetEl.innerHTML = h;
+  }
+
+  // Mantiene la hoja dentro del área visible cuando aparece el teclado del teléfono
+  function fitSheet() {
+    var vv = window.visualViewport;
+    if (!vv || sheetEl.hidden) return;
+    sheetEl.style.top = vv.offsetTop + 'px';
+    sheetEl.style.bottom = 'auto';
+    sheetEl.style.height = vv.height + 'px';
+  }
+  function openSheet(m, id) {
+    if (m === 'edit' && !find(id)) return;
+    sheet = { mode: m, id: id || null, del: false, type: 'd', back: sheet && sheet.mode === 'mail' && m === 'guide' };
+    renderSheet();
+    sheetEl.hidden = false;
+    document.documentElement.classList.add('lock');
+    toastEl.hidden = true;
+    fitSheet();
+    var target = document.getElementById(m === 'add' ? 'f-amount' : m === 'adjust' ? 'f-saldo' : 'sheet-form');
+    if (target) target.focus();
+  }
+  function closeSheet() {
+    sheet = null; sheetEl.hidden = true; sheetEl.innerHTML = '';
+    sheetEl.style.top = ''; sheetEl.style.bottom = ''; sheetEl.style.height = '';
+    document.documentElement.classList.remove('lock');
+  }
+  function setErr(msg) {
+    var e = document.getElementById('f-err');
+    if (!e) return;
+    e.textContent = msg; e.hidden = !msg;
+  }
+  function val(id) { var el = document.getElementById(id); return el ? el.value : ''; }
+  function digits(id) { return val(id).replace(/[.\s$]/g, ''); }
+
+  async function saveMove() {
+    var today = todayKey();
+    var p = sheet.id ? find(sheet.id) : null;
+    if (sheet.mode === 'edit' && !p) { closeSheet(); return; }
+    var type = p ? p.type : sheet.type;
+    var raw = digits('f-amount'), desc = clean(val('f-desc')), date = val('f-date'), time = val('f-time');
+    if (!/^\d+$/.test(raw) || +raw <= 0) { setErr('Escribe el monto en pesos, por ejemplo 150000.'); return; }
+    if (+raw > MAX_AMOUNT) { setErr('El monto es demasiado grande. Revisa los dígitos.'); return; }
+    if (!validDate(date)) { setErr('Indica la fecha del movimiento.'); return; }
+    if (date > today) { setErr('La fecha no puede ser futura.'); return; }
+    if (!TIME_RE.test(time)) { setErr('Indica la hora, por ejemplo 13:04.'); return; }
+    if (!desc && p && p.src === 'mail') { setErr('Escribe el nombre del comercio.'); return; }
+    if (!desc) desc = type === 'd' ? 'Depósito' : 'Gasto';
+    var rec = p ? { id: p.id, type: type, date: date, time: time, desc: desc, amount: +raw, src: p.src, key: p.key, acct: p.acct, ts: p.ts }
+                : { id: genId(), type: type, date: date, time: time, desc: desc, amount: +raw, src: 'manual', key: '', acct: '', ts: Date.now() };
+    busy = true;
+    var ok = await commit([rec], []);
+    busy = false;
+    if (!ok) return;
+    closeSheet();
+    toast(p ? 'Cambios guardados' : (type === 'd' ? 'Depósito anotado · +' : 'Gasto anotado · −') + '$' + dots(rec.amount));
+  }
+
+  async function saveAdjust() {
+    var raw = digits('f-saldo');
+    if (!/^\d+$/.test(raw)) { setErr('Escribe el saldo en pesos, por ejemplo 850000.'); return; }
+    if (+raw > MAX_AMOUNT) { setErr('El saldo es demasiado grande. Revisa los dígitos.'); return; }
+    var prev = cfg, first = !cfg.at;
+    var next = { amount: +raw, at: todayKey() + 'T' + nowTime(), ignored: cfg.ignored };
+    busy = true;
+    var ok = await commit([], [], next);
+    busy = false;
+    if (!ok) return;
+    closeSheet();
+    toast((first ? 'Saldo definido en ' : 'Saldo ajustado a ') + money(next.amount), 'Deshacer', function () { commit([], [], prev); }, 6000);
+  }
+
+  function pastePreview() {
+    var out = document.getElementById('f-found'), btn = document.getElementById('f-paste-add');
+    if (!out || !btn) return;
+    setErr('');
+    var text = val('f-paste');
+    var parsed = parseMail(text), res = pending(parsed, 'paste'), isNew = {};
+    res.ups.forEach(function (u) { isNew[u.key] = 1; });
+    out.innerHTML = parsed.found.map(function (p) {
+      return '<li><b>' + esc(p.merchant) + '</b><i>' + money(p.amount) + '</i><span>' + fmt(p.date) + ', ' + p.time + (isNew[p.key] ? '' : ' · Ya registrada') + '</span></li>';
+    }).join('');
+    out.hidden = !parsed.found.length;
+    var k = res.ups.length;
+    btn.disabled = !k;
+    btn.textContent = k > 1 ? 'Agregar ' + k + ' compras' : 'Agregar compra';
+    if (!parsed.found.length && text.trim().length > 30) {
+      setErr(parsed.credit || parsed.foreign ? 'Ese aviso no es de la cuenta.' + skippedNote(parsed) : 'No reconozco un aviso de compra en ese texto. Revisa que esté completo, con el monto, el comercio y la fecha.');
+    }
+  }
+
+  sheetEl.addEventListener('click', async function (ev) {
+    var b = ev.target.closest('[data-act]');
+    if (!b || !sheet) return;
+    var a = b.getAttribute('data-act');
+    if (a === 'cancel') { if (!busy) closeSheet(); return; }
+    if (a === 'guide') { openSheet('guide'); return; }
+    if (a === 'guide-done') { if (sheet.back) openSheet('mail'); else closeSheet(); return; }
+    if (a === 'copy-sender') { copyText(SENDER, 'Remitente copiado'); return; }
+    if (a === 'paste-add') { importText(val('f-paste'), 'paste'); return; }
+    if (a === 'type') {
+      var t = b.getAttribute('data-t') === 'c' ? 'c' : 'd';
+      sheet.type = t;
+      Array.prototype.forEach.call(sheetEl.querySelectorAll('.seg button'), function (x) { x.setAttribute('aria-pressed', String(x.getAttribute('data-t') === t)); });
+      var d = document.getElementById('f-desc'), save = document.getElementById('f-save'), dl = document.getElementById('f-descs');
+      if (d) d.placeholder = t === 'd' ? 'Ej. Sueldo, transferencia recibida' : 'Ej. Giro en cajero, transferencia';
+      if (dl) dl.innerHTML = descOptions(t).map(function (x) { return '<option value="' + esc(x) + '"></option>'; }).join('');
+      if (save && !sheet.id) save.textContent = t === 'd' ? 'Guardar depósito' : 'Guardar gasto';
+      return;
+    }
+    if (a === 'delete') {
+      var p = sheet.id ? find(sheet.id) : null;
+      if (!p) { closeSheet(); return; }
+      if (!sheet.del) { sheet.del = true; b.textContent = 'Toca de nuevo para eliminar'; b.classList.add('armed'); return; }
+      if (busy) return;
+      var prev = cfg, next = null;
+      if (p.key) next = { amount: cfg.amount, at: cfg.at, ignored: cfg.ignored.filter(function (x) { return x !== p.key; }).concat(p.key).slice(-MAX_IGNORED) };
+      busy = true;
+      var ok = await commit([], [p.id], next);
+      busy = false;
+      if (ok) { closeSheet(); toast('Movimiento eliminado', 'Deshacer', function () { commit([p], [], next ? prev : null); }, 6000); }
+    }
+  });
+
+  sheetEl.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    if (!sheet || busy) return;
+    if (sheet.mode === 'adjust') saveAdjust();
+    else if (sheet.mode === 'add' || sheet.mode === 'edit') saveMove();
+  });
+
+  sheetEl.addEventListener('input', function (ev) {
+    var t = ev.target;
+    if (!t) return;
+    if (t.id === 'f-amount' || t.id === 'f-saldo') {
+      // El monto se muestra con separador de miles mientras se escribe
+      var d = t.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '').slice(0, 10);
+      if (t.id === 'f-amount') d = d.replace(/^0+/, '');
+      t.value = d ? dots(+d) : '';
+    } else if (t.id === 'f-paste') {
+      pastePreview();
+    } else if (t.id === 'f-date' || t.id === 'f-time') {
+      var n = document.getElementById('f-note'), msg = anchorNote(val('f-date'), val('f-time'));
+      if (n) { n.textContent = msg; n.hidden = !msg; }
+    }
+  });
+
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && sheet && !busy) closeSheet();
+    else if ((ev.key === 'Enter' || ev.key === ' ') && ev.target && ev.target.id === 'f-pick') { ev.preventDefault(); fileIn.click(); }
+  });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', fitSheet);
+    window.visualViewport.addEventListener('scroll', fitSheet);
+  }
+
+  /* ---------- Acciones de la página ---------- */
+  app.addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-act]');
+    if (!b) return;
+    var a = b.getAttribute('data-act');
+    if (a === 'add') openSheet('add');
+    else if (a === 'edit') openSheet('edit', b.getAttribute('data-id'));
+    else if (a === 'adjust') openSheet('adjust');
+    else if (a === 'guide') openSheet('guide');
+    else if (a === 'mail-sheet') openSheet('mail');
+    else if (a === 'mail') { if (prefs.linked) fileIn.click(); else openSheet('mail'); }
+    else if (a === 'order') { prefs.order = prefs.order === 'desc' ? 'asc' : 'desc'; savePrefs(); render(); }
+    else if (a === 'filter') { filter = b.getAttribute('data-f'); shown = PAGE; render(); }
+    else if (a === 'more') { shown += PAGE; render(); }
+    else if (a === 'bk-copy') backupCopy();
+    else if (a === 'bk-restore') backupRestore(b);
+    else if (a === 'wipe') wipe(b);
+  });
+
+  function backupCopy() {
+    var ta = document.getElementById('bk-text');
+    var json = JSON.stringify({ app: 'fan', v: 1, cuenta: cfg, movimientos: items.map(function (m) { var d = toDoc(m); d.id = m.id; return d; }) });
+    ta.value = json;
+    function manual() { ta.focus(); ta.select(); toast('Selecciona el texto y cópialo'); }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(json).then(function () { toast('Respaldo copiado'); }, manual);
+      else manual();
+    } catch (e) { manual(); }
+  }
+
+  async function backupRestore(btn) {
+    var ta = document.getElementById('bk-text');
+    var list = [], nextCfg;
+    try {
+      var data = JSON.parse(ta.value);
+      if (!data || !Array.isArray(data.movimientos)) throw new Error('formato');
+      data.movimientos.forEach(function (p) { var n = norm(p); if (n) list.push(n); });
+      nextCfg = normCfg(data.cuenta);
+    } catch (e) { toast('El texto no es un respaldo válido'); return; }
+    if (!list.length && !nextCfg.at) { toast('El respaldo no tiene movimientos'); return; }
+    if ((items.length || cfg.at) && !restoreArmed) {
+      restoreArmed = true; btn.textContent = 'Toca de nuevo para reemplazar';
+      toast('Esto reemplaza los datos actuales');
+      return;
+    }
+    if (busy) return;
+    var keep = {};
+    list.forEach(function (m) { keep[m.id] = 1; });
+    busy = true;
+    var ok = await commit(list, items.filter(function (m) { return !keep[m.id]; }).map(function (m) { return m.id; }), nextCfg);
+    busy = false;
+    if (ok) toast('Respaldo restaurado');
+  }
+
+  async function wipe(btn) {
+    if (!wipeArmed) { wipeArmed = true; btn.textContent = 'Toca de nuevo para borrar todo'; btn.classList.add('armed'); return; }
+    if (busy) return;
+    var snap = items.slice(), prev = cfg;
+    busy = true;
+    var ok = await commit([], snap.map(function (m) { return m.id; }), { amount: 0, at: '', ignored: [] });
+    busy = false;
+    if (ok) toast('Datos borrados', 'Deshacer', function () { commit(snap, [], prev); }, 9000);
+  }
+
+  /* ---------- Arranque ---------- */
+  function fallback() { mode = 'local'; db = null; loading = false; loadLocal(); render(); }
+
+  async function connect() {
+    try {
+      if (!hasHost) return;
+      db = await window.claude.use('db');
+      if (!db) { fallback(); return; }
+      mode = 'db';
+      var ready = function () { if (gotItems && gotCfg) loading = false; render(); };
+      db.collection(COL).onSnapshot(function (snap) {
+        var list = [];
+        snap.docs.forEach(function (doc) {
+          var n = norm(Object.assign({}, doc.data() || {}, { id: doc.id }));
+          if (n) list.push(n);
+        });
+        items = list; sortItems(); gotItems = true; ready();
+      }, function () { fallback(); });
+      db.doc(CFG_PATH).onSnapshot(function (snap) {
+        cfg = normCfg(snap.exists ? snap.data() : null); gotCfg = true; ready();
+      }, function () { fallback(); });
+    } catch (e) { fallback(); }
+  }
+
+  loadPrefs();
+  if (!loading) loadLocal();
+  render();
+  connect();
+
+  if (!hasHost && 'serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+  }
+})();
+</script>
+
+</body>
+</html>
