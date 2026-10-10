@@ -428,7 +428,8 @@ svg { display: block; }
       var date = m[7] + '-' + pad(+m[6]) + '-' + pad(+m[5]), time = pad(+m[8]) + ':' + m[9];
       if (!validDate(date) || !TIME_RE.test(time) || !merchant || !(amount > 0) || amount > MAX_AMOUNT) continue;
       if (cur !== '$') { out.foreign++; continue; }
-      if (/cr[eé]dito/i.test(medio)) { out.credit++; continue; }
+      // «Crédito» puede llegar con el acento dañado (CrÃ©dito, Cr?dito), según cómo Atajos lea el correo
+      if (/cr.{0,12}dito/i.test(medio)) { out.credit++; continue; }
       var key = date + 'T' + time + '|' + amount + '|' + merchant.toUpperCase();
       if (seen[key]) continue;
       seen[key] = 1;
