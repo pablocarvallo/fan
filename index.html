@@ -364,7 +364,8 @@ svg { display: block; }
   var toastEl = document.getElementById('toast');
 
   var items = [];                                   // movimientos, del más antiguo al más reciente
-  // Saldo ajustado, cuándo, avisos del banco descartados y, si llegan avisos de varias cuentas, la única que se sigue
+  // Saldo ajustado, cuándo, avisos del banco descartados y la cuenta que se sigue: '' sin decidir, sus cuatro
+  // últimos dígitos si es una sola, o '*' si se incluyen todas
   var cfg = { amount: 0, at: '', ignored: [], acct: '' };
   // De este dispositivo: orden del listado, buzón (repositorio y token), última lectura y último correo que no era una compra
   var prefs = { order: 'desc', repo: '', token: '', last: 0, note: null, v: 2 };
@@ -503,7 +504,7 @@ svg { display: block; }
     c = c || {};
     var amount = Math.round(+c.amount), at = AT_RE.test(String(c.at)) && validDate(String(c.at).slice(0, 10)) ? String(c.at) : '';
     var ign = Array.isArray(c.ignored) ? c.ignored.filter(function (k) { return typeof k === 'string' && k; }).slice(-MAX_IGNORED) : [];
-    return { amount: at && amount >= 0 && amount <= MAX_AMOUNT ? amount : 0, at: at, ignored: ign, acct: /^\d{4}$/.test(String(c.acct || '')) ? String(c.acct) : '' };
+    return { amount: at && amount >= 0 && amount <= MAX_AMOUNT ? amount : 0, at: at, ignored: ign, acct: /^(\d{4}|\*)$/.test(String(c.acct || '')) ? String(c.acct) : '' };
   }
   function sortItems() {
     items.sort(function (a, b) {
@@ -620,7 +621,7 @@ svg { display: block; }
   }
 
   /* ---------- Traer compras: buzón de avisos o texto pegado ---------- */
-  function otherAcct(p) { return !!(cfg.acct && p.acct && p.acct !== cfg.acct); }
+  function otherAcct(p) { return /^\d{4}$/.test(cfg.acct) && !!p.acct && p.acct !== cfg.acct; }
   function pending(parsed, source) {
     var have = {}, ign = {}, ups = [], known = 0, back = [], other = 0;
     items.forEach(function (m) { if (m.key) have[skel(m.key)] = 1; });
@@ -681,6 +682,7 @@ svg { display: block; }
     if (!parsed.found.length) { pastePreview(); return; }
     var r = await addParsed(parsed, 'paste');
     if (!r.ok) return;
+    await autoAcct();
     closeSheet(); render();
     toast(r.added ? addedMsg(r, parsed) : r.other ? 'Esa compra es de otra cuenta: FAN sigue solo la ··' + cfg.acct + '.'
       : r.found === 1 ? 'Esa compra ya estaba registrada.' : 'Esas compras ya estaban registradas.', null, null, 5200);
@@ -772,6 +774,16 @@ svg { display: block; }
     Object.keys(n).forEach(function (a) { list.push({ acct: a, n: n[a] }); });
     return list.sort(function (a, b) { return b.n - a.n; });
   }
+  // Mientras no se haya decidido otra cosa, si todas las compras leídas son de una misma cuenta, FAN se queda con esa:
+  // así un aviso de otra cuenta que llegue después al buzón no descuenta del saldo.
+  async function autoAcct() {
+    if (cfg.acct || busy) return;
+    var list = acctCounts();
+    if (list.length !== 1) return;
+    busy = true;
+    await commit([], [], { amount: cfg.amount, at: cfg.at, ignored: cfg.ignored, acct: list[0].acct });
+    busy = false;
+  }
   async function chooseAcct(a) {
     if (busy || !/^\d{4}$/.test(a)) return;
     var prev = cfg, gone = items.filter(function (m) { return m.src === 'mail' && m.acct && m.acct !== a; });
@@ -817,6 +829,7 @@ svg { display: block; }
       }
     } catch (e) { syncErr = errCode(e); }
     syncing = false;
+    if (r && r.ok) await autoAcct();
     render();
     if (r && r.ok && (r.added || r.removed)) toast(addedMsg(r, null), null, null, 6500);
     else if (manual && r && r.ok) toast('Al día: no hay compras nuevas en el buzón.');
@@ -851,6 +864,7 @@ svg { display: block; }
     prefs.repo = repo; prefs.token = token; prefs.last = started; prefs.note = box.note; prefs.v = 2; savePrefs();
     var r = await addParsed(box.parsed, 'box');
     syncing = false; syncErr = ''; lastTry = Date.now();
+    if (r.ok) await autoAcct();
     openSheet('box');   // ahora muestra los datos para crear la automatización en Atajos
     render();
     toast('Buzón conectado. ' + (r.added || r.removed ? addedMsg(r, box.parsed) : box.parsed.found.length ? 'Sus compras ya estaban registradas.' : 'Aún no tiene avisos: llegarán con tu próxima compra.'), null, null, 6500);
@@ -1059,8 +1073,10 @@ svg { display: block; }
   function sheetBox() {
     if (prefs.repo) {
       var anyMail = items.some(function (m) { return m.src === 'mail'; });
-      var acctNote = cfg.acct
-        ? '<div class="note">FAN sigue solo la cuenta <strong>··' + cfg.acct + '</strong> y deja fuera las compras de otras cuentas.<br><button type="button" class="btn ghost small" data-act="acct-clear">Volver a incluir todas</button></div>'
+      var acctNote = /^\d{4}$/.test(cfg.acct)
+        ? '<div class="note">FAN sigue solo la cuenta <strong>··' + cfg.acct + '</strong>. Las compras de otras cuentas que lleguen al buzón no se registran.<br><button type="button" class="btn ghost small" data-act="acct-all">Incluir todas las cuentas</button></div>'
+        : cfg.acct === '*'
+        ? '<div class="note">FAN registra las compras de todas las cuentas que lleguen al buzón.<br><button type="button" class="btn ghost small" data-act="acct-one">Seguir una sola cuenta</button></div>'
         : '';
       return '<div class="panel" id="sheet-form" role="dialog" aria-modal="true" aria-labelledby="sheet-title" tabindex="-1">' +
         '<h2 id="sheet-title">Buzón y atajo</h2>' +
@@ -1070,7 +1086,7 @@ svg { display: block; }
         '<details class="how"' + (anyMail ? '' : ' open') + '><summary>Automatización en Atajos</summary>' +
         '<p class="sub">Se crea una sola vez. Envía al buzón cada correo del banco apenas llega a Mail.</p>' +
         '<ol class="guide">' +
-        '<li><div>Abre <strong>Atajos</strong>, entra a <strong>Automatización</strong> y toca <strong>+</strong>. Elige <strong>Correo electrónico</strong> y en <strong>Remitente</strong> escribe el del banco. Si en Mail tienes más de una cuenta de correo, elige en <strong>Cuenta</strong> la que recibe los avisos.<br><button type="button" class="btn tonal small" data-act="copy-sender">Copiar remitente</button></div></li>' +
+        '<li><div>Abre <strong>Atajos</strong>, entra a <strong>Automatización</strong> y toca <strong>+</strong>. Elige <strong>Correo electrónico</strong> y en <strong>Remitente</strong> escribe el del banco. Deja vacías las demás condiciones.<br><button type="button" class="btn tonal small" data-act="copy-sender">Copiar remitente</button></div></li>' +
         '<li><div>Marca <strong>Ejecutar inmediatamente</strong>, toca <strong>Siguiente</strong> y elige <strong>Nueva automatización en blanco</strong>.</div></li>' +
         '<li><div>Toca <strong>Agregar acción</strong>, busca «URL» y elige <strong>Obtener contenido de URL</strong>. En el campo de la URL pega la dirección del buzón.<br><button type="button" class="btn tonal small" data-act="copy-url">Copiar dirección</button></div></li>' +
         '<li><div>Toca <strong>Mostrar más</strong> y en <strong>Método</strong> elige <strong>POST</strong>.</div></li>' +
@@ -1206,12 +1222,15 @@ svg { display: block; }
     if (a === 'copy-url') { copyText(API + prefs.repo + '/issues', 'Dirección copiada'); return; }
     if (a === 'copy-auth') { copyText('Bearer ' + prefs.token, 'Autorización copiada'); return; }
     if (a === 'copy-mails') { copyText(sheet.mails || '', 'Detalle copiado'); return; }
-    if (a === 'acct-clear') {
+    if (a === 'acct-all' || a === 'acct-one') {
       if (busy) return;
       busy = true;
-      var okA = await commit([], [], { amount: cfg.amount, at: cfg.at, ignored: cfg.ignored, acct: '' });
+      var okA = await commit([], [], { amount: cfg.amount, at: cfg.at, ignored: cfg.ignored, acct: a === 'acct-all' ? '*' : '' });
       busy = false;
-      if (okA) { closeSheet(); syncBox(true, true); }
+      if (!okA) return;
+      closeSheet();
+      if (a === 'acct-all') syncBox(true, true);   // vuelve a traer las compras de las otras cuentas
+      else { await autoAcct(); render(); }
       return;
     }
     if (a === 'paste-add') { importPaste(); return; }
@@ -1367,7 +1386,7 @@ svg { display: block; }
   }
 
   loadPrefs();
-  if (!loading) loadLocal();
+  if (!loading) { loadLocal(); autoAcct(); }
   render();
   connect();
   if (canSync && prefs.repo) syncBox(false);
