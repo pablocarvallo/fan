@@ -288,6 +288,19 @@ svg { display: block; }
 .guide strong { font-weight: 600; }
 .guide .btn { margin-top: 8px; }
 .panel h3 { font-size: 18px; }
+.fine { font-size: 14px; }
+.mails { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.mails li { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 12px; background: var(--bg); font-size: 14px; }
+.mails b { font-weight: 600; font-size: 15px; }
+.mails span { color: var(--muted); overflow-wrap: anywhere; }
+.mails li.ok b { color: var(--in); }
+.mails li.bad b, .mails li.new b { color: var(--over); }
+.how summary { min-height: 44px; display: flex; align-items: center; font-family: var(--font-display); font-size: 18px; font-weight: 700; cursor: pointer; }
+.how > *:not(summary) { margin-top: 12px; }
+.how .sub { margin-top: 0; }
+.pick { background: var(--accent-bg); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
+.pick p { margin: 0; font-size: 15px; }
+.pick .btn { background: var(--surface); border-color: transparent; color: var(--ink); min-height: 48px; }
 .raw { margin: 6px 0 0; padding: 8px 10px; border-radius: 10px; background: var(--surface); font-size: 13px; color: var(--muted); overflow-wrap: anywhere; max-height: 120px; overflow-y: auto; }
 .mono { font-family: ui-monospace, Menlo, monospace; font-size: 14px; background: var(--track); padding: 1px 6px; border-radius: 6px; overflow-wrap: anywhere; }
 @keyframes rise { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
@@ -351,9 +364,10 @@ svg { display: block; }
   var toastEl = document.getElementById('toast');
 
   var items = [];                                   // movimientos, del más antiguo al más reciente
-  var cfg = { amount: 0, at: '', ignored: [] };     // saldo ajustado, cuándo, y avisos del banco descartados
+  // Saldo ajustado, cuándo, avisos del banco descartados y, si llegan avisos de varias cuentas, la única que se sigue
+  var cfg = { amount: 0, at: '', ignored: [], acct: '' };
   // De este dispositivo: orden del listado, buzón (repositorio y token), última lectura y último correo que no era una compra
-  var prefs = { order: 'desc', repo: '', token: '', last: 0, note: null };
+  var prefs = { order: 'desc', repo: '', token: '', last: 0, note: null, v: 2 };
   var filter = 'all';                               // 'all' | 'c' compras y gastos | 'd' depósitos
   var shown = PAGE;
   var fresh = {};                                   // movimientos recién traídos, para marcarlos como nuevos
@@ -411,29 +425,53 @@ svg { display: block; }
   /* ---------- Lector de los avisos del banco ---------- */
   // Formato del aviso: "Te informamos que se ha realizado una compra por $1.380 con cargo a Cuenta ****0000
   // en COMERCIO el 07/10/2026 13:04." El texto puede venir con etiquetas HTML, saltos de línea o varios avisos seguidos.
+  // Si Atajos entrega el correo mal decodificado, «é» llega como «Ã©» y el espacio duro como «Â ». Esto lo repara
+  // letra por letra, sin tocar el texto que viene bien.
+  var CP1252 = { 0x20ac: 0x80, 0x201a: 0x82, 0x0192: 0x83, 0x201e: 0x84, 0x2026: 0x85, 0x2020: 0x86, 0x2021: 0x87, 0x02c6: 0x88, 0x2030: 0x89, 0x0160: 0x8a,
+    0x2039: 0x8b, 0x0152: 0x8c, 0x017d: 0x8e, 0x2018: 0x91, 0x2019: 0x92, 0x201c: 0x93, 0x201d: 0x94, 0x2022: 0x95, 0x2013: 0x96, 0x2014: 0x97, 0x02dc: 0x98,
+    0x2122: 0x99, 0x0161: 0x9a, 0x203a: 0x9b, 0x0153: 0x9c, 0x017e: 0x9e, 0x0178: 0x9f };
+  function contByte(ch) { var c = ch.charCodeAt(0); if (c > 0xff) c = CP1252[c] || 0; return c >= 0x80 && c <= 0xbf ? c : -1; }
+  function demojibake(s) {
+    if (!/[ÂÃâ]/.test(s)) return s;
+    return s.replace(/[ÂÃ][^\u0000-\u007f]|â[^\u0000-\u007f]{2}/g, function (seq) {
+      var b1 = contByte(seq.charAt(1)), b2 = seq.length > 2 ? contByte(seq.charAt(2)) : 0;
+      if (b1 < 0 || b2 < 0) return seq;
+      return String.fromCharCode(seq.length > 2 ? (0x2 << 12) | ((b1 & 0x3f) << 6) | (b2 & 0x3f) : ((seq.charCodeAt(0) & 0x1f) << 6) | (b1 & 0x3f));
+    });
+  }
   function plainText(s) {
     s = String(s == null ? '' : s);
     if (s.length > 4000000) s = s.slice(-4000000);
+    s = demojibake(s);
+    if (s.normalize) s = s.normalize('NFC');   // «é» siempre como una sola letra, venga como venga en el correo
     if (/<[a-z!\/][^>]*>/i.test(s)) s = s.replace(/<(script|style)\b[\s\S]*?<\/\1>/gi, ' ').replace(/<[^>]+>/g, ' ');
     if (/&[#a-z0-9]+;/i.test(s)) { var t = document.createElement('textarea'); t.innerHTML = s; s = t.value; }
     return s.replace(/[\s ​‌‍﻿]+/g, ' ');
   }
+  // La clave de una compra, sin signos ni acentos en el comercio: así un mismo aviso se reconoce aunque el correo
+  // haya llegado una vez con el texto dañado y otra vez bien.
+  function skel(key) {
+    var p = String(key).split('|');
+    return p[0] + '|' + (p[1] || '') + '|' + p.slice(2).join('').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  }
   function parseMail(raw) {
     var text = plainText(raw);
-    var re = /compra\s+por\s+(US\$|USD|\$)?\s?([\d.]+(?:,\d{1,2})?)\s+con\s+(?:cargo\s+a\s+)?(.{1,60}?)\s+en\s+(.{1,80}?)\s+el\s+(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})/gi;
-    var out = { found: [], credit: 0, foreign: 0 }, seen = {}, m;
+    // Entre las palabras fijas del aviso se toleran hasta 4 signos sueltos (un «?» o un espacio dañado), no solo espacios
+    var re = /compra\W{1,4}por\W{1,4}?(US\$|USD|\$)?\W{0,3}?([\d.]+(?:,\d{1,2})?)\W{1,4}con\W{1,4}(?:cargo\W{1,4}a\W{1,4})?(.{1,60}?)\s+en\s+(.{1,80}?)\s+el\s+(\d{1,2})\/(\d{1,2})\/(\d{4})\W{1,4}(\d{1,2}):(\d{2})/gi;
+    var out = { found: [], credit: 0, foreign: 0, creditKeys: [] }, seen = {}, m;
     while ((m = re.exec(text))) {
       var cur = (m[1] || '$').toUpperCase(), medio = m[3], merchant = clean(m[4]);
       var amount = parseInt(m[2].replace(/\./g, '').replace(/,.*$/, ''), 10);
       var date = m[7] + '-' + pad(+m[6]) + '-' + pad(+m[5]), time = pad(+m[8]) + ':' + m[9];
       if (!validDate(date) || !TIME_RE.test(time) || !merchant || !(amount > 0) || amount > MAX_AMOUNT) continue;
       if (cur !== '$') { out.foreign++; continue; }
-      // «Crédito» puede llegar con el acento dañado (CrÃ©dito, Cr?dito), según cómo Atajos lea el correo
-      if (/cr.{0,12}dito/i.test(medio)) { out.credit++; continue; }
       var key = date + 'T' + time + '|' + amount + '|' + merchant.toUpperCase();
+      // Con tarjeta de crédito no se descuenta de la cuenta (esas compras las registra la app Master).
+      // «Crédito» puede llegar con el acento dañado (CrÃ©dito, Cr?dito), según cómo Atajos lea el correo.
+      if (/cr.{0,12}dito/i.test(medio)) { out.credit++; out.creditKeys.push(key); continue; }
       if (seen[key]) continue;
       seen[key] = 1;
-      var acct = (/(\d{4})\s*$/.exec(medio) || [])[1] || '';
+      var acct = (/(\d{4})\W*$/.exec(medio) || [])[1] || '';
       out.found.push({ date: date, time: time, amount: amount, merchant: merchant, acct: acct, key: key });
     }
     return out;
@@ -465,7 +503,7 @@ svg { display: block; }
     c = c || {};
     var amount = Math.round(+c.amount), at = AT_RE.test(String(c.at)) && validDate(String(c.at).slice(0, 10)) ? String(c.at) : '';
     var ign = Array.isArray(c.ignored) ? c.ignored.filter(function (k) { return typeof k === 'string' && k; }).slice(-MAX_IGNORED) : [];
-    return { amount: at && amount >= 0 && amount <= MAX_AMOUNT ? amount : 0, at: at, ignored: ign };
+    return { amount: at && amount >= 0 && amount <= MAX_AMOUNT ? amount : 0, at: at, ignored: ign, acct: /^\d{4}$/.test(String(c.acct || '')) ? String(c.acct) : '' };
   }
   function sortItems() {
     items.sort(function (a, b) {
@@ -512,6 +550,7 @@ svg { display: block; }
       if (!prefs.repo) prefs.token = '';
       prefs.last = prefs.repo && +p.last > 0 ? +p.last : 0;
       prefs.note = prefs.repo && p.note && typeof p.note.text === 'string' ? { text: p.note.text.slice(0, 600), at: +p.note.at || 0 } : null;
+      if (!(+p.v >= 2)) prefs.last = 0;   // tras esta versión, la primera lectura repasa el buzón completo
     } catch (e) {}
   }
   function savePrefs() { try { localStorage.setItem(LS_PREFS, JSON.stringify(prefs)); } catch (e) {} }
@@ -535,7 +574,7 @@ svg { display: block; }
       try {
         for (var i = 0; i < ups.length; i++) await db.collection(COL).doc(ups[i].id).set(toDoc(ups[i]));
         for (var j = 0; j < rems.length; j++) await db.collection(COL).doc(rems[j]).delete();
-        if (newCfg) await db.doc(CFG_PATH).set({ amount: newCfg.amount, at: newCfg.at, ignored: newCfg.ignored });
+        if (newCfg) await db.doc(CFG_PATH).set({ amount: newCfg.amount, at: newCfg.at, ignored: newCfg.ignored, acct: newCfg.acct || '' });
       } catch (e) { toast('No se pudo guardar. Intenta de nuevo.'); return false; }
     }
     items = next; sortItems();
@@ -581,19 +620,23 @@ svg { display: block; }
   }
 
   /* ---------- Traer compras: buzón de avisos o texto pegado ---------- */
+  function otherAcct(p) { return !!(cfg.acct && p.acct && p.acct !== cfg.acct); }
   function pending(parsed, source) {
-    var have = {}, ign = {}, ups = [], known = 0, back = [];
-    items.forEach(function (m) { if (m.key) have[m.key] = 1; });
-    cfg.ignored.forEach(function (k) { ign[k] = 1; });
+    var have = {}, ign = {}, ups = [], known = 0, back = [], other = 0;
+    items.forEach(function (m) { if (m.key) have[skel(m.key)] = 1; });
+    cfg.ignored.forEach(function (k) { ign[skel(k)] = 1; });
     parsed.found.forEach(function (p) {
-      if (have[p.key]) { known++; return; }
-      if (ign[p.key]) {
+      var sk = skel(p.key);
+      if (otherAcct(p)) { other++; return; }           // FAN sigue una sola cuenta
+      if (have[sk]) { known++; return; }
+      have[sk] = 1;
+      if (ign[sk]) {
         if (source === 'box') { known++; return; }     // se eliminó a propósito: el buzón no la devuelve
-        back.push(p.key);                               // pegarla a mano sí la recupera
+        back.push(sk);                                  // pegarla a mano sí la recupera
       }
       ups.push({ id: 'm' + hash(p.key), type: 'c', date: p.date, time: p.time, desc: p.merchant, amount: p.amount, src: 'mail', key: p.key, acct: p.acct, ts: Date.now() });
     });
-    return { ups: ups, known: known, back: back };
+    return { ups: ups, known: known, back: back, other: other };
   }
   function skippedNote(parsed) {
     var parts = [];
@@ -601,24 +644,35 @@ svg { display: block; }
     if (parsed.foreign) parts.push(parsed.foreign + ' en dólares');
     return parts.length ? ' Sin contar: ' + parts.join(' y ') + '.' : '';
   }
-  // Agrega las compras leídas que falten y cuenta qué pasó, para que cada origen arme su mensaje
+  // Agrega las compras leídas que falten y cuenta qué pasó, para que cada origen arme su mensaje.
+  // Al leer el buzón también quita las que se registraron por error y en realidad eran con tarjeta de crédito.
   async function addParsed(parsed, source) {
-    var res = pending(parsed, source), out = { ok: true, found: parsed.found.length, added: 0, sum: 0, old: 0 };
-    if (!res.ups.length) return out;
-    var newCfg = res.back.length ? { amount: cfg.amount, at: cfg.at, ignored: cfg.ignored.filter(function (x) { return res.back.indexOf(x) < 0; }) } : null;
+    var res = pending(parsed, source), bad = {}, rems = [];
+    var out = { ok: true, found: parsed.found.length, added: 0, sum: 0, old: 0, other: res.other, removed: 0, removedSum: 0 };
+    if (source === 'box') {
+      (parsed.creditKeys || []).forEach(function (k) { bad[skel(k)] = 1; });
+      rems = items.filter(function (m) { return m.src === 'mail' && m.key && bad[skel(m.key)]; });
+    }
+    if (!res.ups.length && !rems.length) return out;
+    var newCfg = res.back.length ? { amount: cfg.amount, at: cfg.at, ignored: cfg.ignored.filter(function (x) { return res.back.indexOf(skel(x)) < 0; }), acct: cfg.acct } : null;
     busy = true;
-    out.ok = await commit(res.ups, [], newCfg);
+    out.ok = await commit(res.ups, rems.map(function (m) { return m.id; }), newCfg);
     busy = false;
     if (!out.ok) return out;
     fresh = {};
     res.ups.forEach(function (u) { fresh[u.id] = 1; out.sum += u.amount; if (cfg.at && dtOf(u) < cfg.at) out.old++; });
-    out.added = res.ups.length;
+    rems.forEach(function (m) { out.removedSum += m.amount; });
+    out.added = res.ups.length; out.removed = rems.length;
     filter = 'all'; shown = PAGE;
     return out;
   }
   function addedMsg(r, parsed) {
-    var msg = r.added + ' ' + plural(r.added, 'compra nueva', 'compras nuevas') + ' · ' + money(r.sum) + '.';
-    if (r.old) msg += ' ' + r.old + plural(r.old, ' es anterior', ' son anteriores') + ' al ajuste de saldo y no lo ' + plural(r.old, 'cambia', 'cambian') + '.';
+    var msg = '';
+    if (r.added) {
+      msg = r.added + ' ' + plural(r.added, 'compra nueva', 'compras nuevas') + ' · ' + money(r.sum) + '.';
+      if (r.old) msg += ' ' + r.old + plural(r.old, ' es anterior', ' son anteriores') + ' al ajuste de saldo y no lo ' + plural(r.old, 'cambia', 'cambian') + '.';
+    }
+    if (r.removed) msg += (msg ? ' ' : '') + 'Quité ' + r.removed + plural(r.removed, ' compra que era', ' compras que eran') + ' con tarjeta de crédito (' + money(r.removedSum) + ').';
     return msg + (parsed ? skippedNote(parsed) : '');
   }
   async function importPaste() {
@@ -628,11 +682,16 @@ svg { display: block; }
     var r = await addParsed(parsed, 'paste');
     if (!r.ok) return;
     closeSheet(); render();
-    toast(r.added ? addedMsg(r, parsed) : r.found === 1 ? 'Esa compra ya estaba registrada.' : 'Esas compras ya estaban registradas.', null, null, 5200);
+    toast(r.added ? addedMsg(r, parsed) : r.other ? 'Esa compra es de otra cuenta: FAN sigue solo la ··' + cfg.acct + '.'
+      : r.found === 1 ? 'Esa compra ya estaba registrada.' : 'Esas compras ya estaban registradas.', null, null, 5200);
   }
 
   // Buzón: un repositorio privado de GitHub donde Atajos deja cada correo del banco como un «issue».
   function fetchError(status) { var e = new Error('http'); e.status = status; return e; }
+  function issueMsg(it) {
+    var title = String(it.title || '');   // el título solo cuenta si trae el aviso; «Aviso» a secas es la etiqueta del atajo
+    return { text: (title.length > 20 ? title + '\n' : '') + String(it.body || ''), at: Date.parse(it.created_at) || 0 };
+  }
   async function fetchBox(repo, token, since) {
     var ctl = typeof AbortController === 'function' ? new AbortController() : null;
     var timer = setTimeout(function () { if (ctl) ctl.abort(); }, 45000);
@@ -645,26 +704,81 @@ svg { display: block; }
         if (!res.ok) throw fetchError(res.status);
         var list = await res.json();
         if (!Array.isArray(list)) throw new Error('formato');
-        list.forEach(function (it) {
-          if (!it || it.pull_request) return;
-          var title = String(it.title || '');   // el título solo cuenta si trae el aviso; «Aviso» a secas es la etiqueta del atajo
-          out.push({ text: (title.length > 20 ? title + '\n' : '') + String(it.body || ''), at: Date.parse(it.created_at) || 0 });
-        });
+        list.forEach(function (it) { if (it && !it.pull_request) out.push(issueMsg(it)); });
         if (list.length < 100) break;
       }
       return out;
     } finally { clearTimeout(timer); }
   }
+  // Revisión del buzón: los últimos correos que llegaron, del más reciente al más antiguo, y qué hizo FAN con cada uno.
+  // Sirve para saber si un correo que falta se quedó en Atajos (no llegó al buzón) o llegó y no era una compra de la cuenta.
+  async function fetchLatest(n) {
+    var res = await fetch(API + prefs.repo + '/issues?state=all&sort=created&direction=desc&per_page=' + n,
+      { headers: { Authorization: 'Bearer ' + prefs.token, Accept: 'application/vnd.github+json' }, cache: 'no-store' });
+    if (!res.ok) throw fetchError(res.status);
+    var list = await res.json();
+    if (!Array.isArray(list)) throw new Error('formato');
+    return list.filter(function (it) { return it && !it.pull_request; }).map(issueMsg).sort(function (a, b) { return b.at - a.at; });
+  }
+  function verdict(text) {
+    var p = parseMail(text);
+    if (p.found.length) {
+      var f = p.found[0], what = f.merchant + ' · ' + money(f.amount) + (f.acct ? ' · cuenta ··' + f.acct : '');
+      var sk = skel(f.key);
+      if (items.some(function (m) { return m.key && skel(m.key) === sk; })) return { k: 'ok', label: 'Compra registrada', detail: what };
+      if (cfg.ignored.some(function (k) { return skel(k) === sk; })) return { k: 'skip', label: 'Compra que eliminaste', detail: what };
+      if (otherAcct(f)) return { k: 'skip', label: 'Compra con cargo a otra cuenta', detail: what };
+      return { k: 'new', label: 'Compra sin registrar todavía', detail: what + '. Toca «Leer todo el buzón ahora».' };
+    }
+    if (p.credit) return { k: 'skip', label: 'Compra con tarjeta de crédito', detail: 'No se descuenta de la cuenta.' };
+    if (p.foreign) return { k: 'skip', label: 'Compra en dólares', detail: 'No se descuenta del saldo en pesos.' };
+    return { k: 'bad', label: 'No lo reconozco como aviso de compra', detail: '' };
+  }
+  async function loadMails() {
+    var s = sheet, list = [], err = '';
+    try { list = await fetchLatest(15); } catch (e) { err = errMsg(errCode(e)); }
+    var out = document.getElementById('f-mails');
+    if (!out || sheet !== s) return;
+    if (err) { out.innerHTML = '<p class="err">' + esc(err) + '</p>'; return; }
+    if (!list.length) { out.innerHTML = '<p class="empty">El buzón está vacío: la automatización de Atajos todavía no ha enviado ningún correo.</p>'; return; }
+    var lines = ['FAN · últimos correos del buzón ' + prefs.repo];
+    var h = '<p class="muted fine">El más reciente llegó ' + ago(list[0].at) + '. Si el correo que esperas no está en esta lista, Atajos no lo envió al buzón.</p><ul class="mails">';
+    list.forEach(function (m) {
+      var v = verdict(m.text), txt = plainText(m.text).trim(), d = new Date(m.at);
+      h += '<li class="' + v.k + '"><b>' + esc(v.label) + '</b><span>Llegó ' + ago(m.at) + (v.detail ? ' · ' + esc(v.detail) : '') + '</span>' +
+        (v.k === 'bad' ? '<p class="raw">' + (txt ? esc(txt.slice(0, 400)) : 'El correo llegó sin texto.') + '</p>' : '') + '</li>';
+      lines.push('', fmt(dayKey(d)) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ' · ' + v.label + (v.detail ? ' · ' + v.detail : ''),
+        (txt ? txt.slice(0, 600) : '(sin texto)') + ' [' + m.text.length + ' caracteres]');
+    });
+    out.innerHTML = h + '</ul><button type="button" class="btn ghost small" data-act="copy-mails">Copiar este detalle</button>';
+    s.mails = lines.join('\n');
+  }
   // Lee cada correo del buzón por separado: junta las compras y recuerda el último que no era una compra
   function parseBox(msgs) {
-    var all = { found: [], credit: 0, foreign: 0 }, seen = {}, other = null;
+    var all = { found: [], credit: 0, foreign: 0, creditKeys: [] }, seen = {}, other = null;
     msgs.forEach(function (m) {
       var p = parseMail(m.text);
       p.found.forEach(function (f) { if (!seen[f.key]) { seen[f.key] = 1; all.found.push(f); } });
       all.credit += p.credit; all.foreign += p.foreign;
+      all.creditKeys = all.creditKeys.concat(p.creditKeys);
       if (!p.found.length && !p.credit && !p.foreign && (!other || m.at >= other.at)) other = m;
     });
     return { parsed: all, note: other ? { text: plainText(other.text).trim().slice(0, 600), at: other.at } : null };
+  }
+  // Cuando llegan avisos de más de una cuenta, FAN sigue solo la que se elija y deja fuera las demás
+  function acctCounts() {
+    var n = {}, list = [];
+    items.forEach(function (m) { if (m.src === 'mail' && m.acct) n[m.acct] = (n[m.acct] || 0) + 1; });
+    Object.keys(n).forEach(function (a) { list.push({ acct: a, n: n[a] }); });
+    return list.sort(function (a, b) { return b.n - a.n; });
+  }
+  async function chooseAcct(a) {
+    if (busy || !/^\d{4}$/.test(a)) return;
+    var prev = cfg, gone = items.filter(function (m) { return m.src === 'mail' && m.acct && m.acct !== a; });
+    busy = true;
+    var ok = await commit([], gone.map(function (m) { return m.id; }), { amount: cfg.amount, at: cfg.at, ignored: cfg.ignored, acct: a });
+    busy = false;
+    if (ok) toast('FAN sigue la cuenta ··' + a + '. Quité ' + gone.length + plural(gone.length, ' compra de otra cuenta.', ' compras de otras cuentas.'), 'Deshacer', function () { commit(gone, [], prev); }, 9000);
   }
   function errCode(e) {
     var st = e && e.status;
@@ -687,24 +801,24 @@ svg { display: block; }
     var day = dayLabel(dayKey(d));
     return (day === 'Hoy' ? 'hoy' : day === 'Ayer' ? 'ayer' : 'el ' + day) + ' a las ' + hm;
   }
-  async function syncBox(manual) {
+  async function syncBox(manual, full) {
     if (!canSync || !prefs.repo || syncing || busy) return;
     syncing = true; syncErr = ''; lastTry = Date.now();
     render();
     var r = null, started = Date.now();
     try {
-      var msgs = await fetchBox(prefs.repo, prefs.token, prefs.last ? prefs.last - SYNC_MARGIN : 0);
+      var msgs = await fetchBox(prefs.repo, prefs.token, prefs.last && !full ? prefs.last - SYNC_MARGIN : 0);
       var box = parseBox(msgs);
       r = await addParsed(box.parsed, 'box');
       if (r.ok) {
-        prefs.last = started;
+        prefs.last = started; prefs.v = 2;
         if (box.note && (!prefs.note || box.note.at >= prefs.note.at)) prefs.note = box.note;
         savePrefs();
       }
     } catch (e) { syncErr = errCode(e); }
     syncing = false;
     render();
-    if (r && r.ok && r.added) toast(addedMsg(r, null), null, null, 5200);
+    if (r && r.ok && (r.added || r.removed)) toast(addedMsg(r, null), null, null, 6500);
     else if (manual && r && r.ok) toast('Al día: no hay compras nuevas en el buzón.');
     else if (manual && syncErr) toast(errMsg(syncErr), null, null, 6000);
   }
@@ -734,12 +848,12 @@ svg { display: block; }
       return;
     }
     var box = parseBox(msgs);
-    prefs.repo = repo; prefs.token = token; prefs.last = started; prefs.note = box.note; savePrefs();
+    prefs.repo = repo; prefs.token = token; prefs.last = started; prefs.note = box.note; prefs.v = 2; savePrefs();
     var r = await addParsed(box.parsed, 'box');
     syncing = false; syncErr = ''; lastTry = Date.now();
     openSheet('box');   // ahora muestra los datos para crear la automatización en Atajos
     render();
-    toast('Buzón conectado. ' + (r.added ? addedMsg(r, box.parsed) : box.parsed.found.length ? 'Sus compras ya estaban registradas.' : 'Aún no tiene avisos: llegarán con tu próxima compra.'), null, null, 6500);
+    toast('Buzón conectado. ' + (r.added || r.removed ? addedMsg(r, box.parsed) : box.parsed.found.length ? 'Sus compras ya estaban registradas.' : 'Aún no tiene avisos: llegarán con tu próxima compra.'), null, null, 6500);
   }
 
   /* ---------- Vistas ---------- */
@@ -824,8 +938,13 @@ svg { display: block; }
     multiAcct = nAcct > 1;
 
     var h = '<section aria-label="Movimientos"><div class="sec-head"><h2>Movimientos</h2>';
+    var accts = cfg.acct ? [] : acctCounts(), pick = '';
+    if (accts.length > 1) {
+      pick = '<div class="pick" role="group" aria-label="Elegir la cuenta"><p><strong>Hay compras de más de una cuenta.</strong> FAN lleva el saldo de una sola: elige cuál y se quitan las demás.</p>' +
+        accts.map(function (x) { return '<button class="btn block" data-act="acct" data-a="' + x.acct + '">Cuenta ··' + x.acct + ' · ' + x.n + ' ' + plural(x.n, 'compra', 'compras') + '</button>'; }).join('') + '</div>';
+    }
     if (items.length > 1) h += '<button class="btn ghost small" data-act="order" aria-label="Cambiar el orden del listado">' + I_SORT + (prefs.order === 'desc' ? 'Recientes primero' : 'Antiguos primero') + '</button>';
-    h += '</div>';
+    h += '</div>' + pick;
     var nd = 0;
     items.forEach(function (m) { if (m.type === 'd') nd++; });
     if (nd && nd < items.length) {
@@ -939,25 +1058,27 @@ svg { display: block; }
 
   function sheetBox() {
     if (prefs.repo) {
-      var note = prefs.note && prefs.note.text
-        ? '<div class="note"><strong>Último correo del banco que no era una compra</strong>' + (prefs.note.at ? ' (' + ago(prefs.note.at) + ')' : '') + ':' +
-          '<p class="raw">' + esc(prefs.note.text) + '</p><button type="button" class="btn ghost small" data-act="copy-note">Copiar ese texto</button></div>'
+      var anyMail = items.some(function (m) { return m.src === 'mail'; });
+      var acctNote = cfg.acct
+        ? '<div class="note">FAN sigue solo la cuenta <strong>··' + cfg.acct + '</strong> y deja fuera las compras de otras cuentas.<br><button type="button" class="btn ghost small" data-act="acct-clear">Volver a incluir todas</button></div>'
         : '';
       return '<div class="panel" id="sheet-form" role="dialog" aria-modal="true" aria-labelledby="sheet-title" tabindex="-1">' +
         '<h2 id="sheet-title">Buzón y atajo</h2>' +
         '<p class="sub">FAN lee <strong>' + esc(prefs.repo) + '</strong> al abrirse y agrega las compras que falten.' + (prefs.last ? ' Última lectura: ' + ago(prefs.last) + '.' : '') + '</p>' +
-        '<h3>Automatización en Atajos</h3>' +
+        acctNote +
+        '<h3>Últimos correos del buzón</h3><div class="stack" id="f-mails"><p class="muted fine">Revisando el buzón…</p></div>' +
+        '<details class="how"' + (anyMail ? '' : ' open') + '><summary>Automatización en Atajos</summary>' +
         '<p class="sub">Se crea una sola vez. Envía al buzón cada correo del banco apenas llega a Mail.</p>' +
         '<ol class="guide">' +
-        '<li><div>Abre <strong>Atajos</strong>, entra a <strong>Automatización</strong> y toca <strong>+</strong>. Elige <strong>Correo electrónico</strong> y en <strong>Remitente</strong> escribe el del banco.<br><button type="button" class="btn tonal small" data-act="copy-sender">Copiar remitente</button></div></li>' +
+        '<li><div>Abre <strong>Atajos</strong>, entra a <strong>Automatización</strong> y toca <strong>+</strong>. Elige <strong>Correo electrónico</strong> y en <strong>Remitente</strong> escribe el del banco. Si en Mail tienes más de una cuenta de correo, elige en <strong>Cuenta</strong> la que recibe los avisos.<br><button type="button" class="btn tonal small" data-act="copy-sender">Copiar remitente</button></div></li>' +
         '<li><div>Marca <strong>Ejecutar inmediatamente</strong>, toca <strong>Siguiente</strong> y elige <strong>Nueva automatización en blanco</strong>.</div></li>' +
         '<li><div>Toca <strong>Agregar acción</strong>, busca «URL» y elige <strong>Obtener contenido de URL</strong>. En el campo de la URL pega la dirección del buzón.<br><button type="button" class="btn tonal small" data-act="copy-url">Copiar dirección</button></div></li>' +
         '<li><div>Toca <strong>Mostrar más</strong> y en <strong>Método</strong> elige <strong>POST</strong>.</div></li>' +
         '<li><div>En <strong>Encabezados</strong>, agrega uno nuevo: en la clave escribe <span class="mono">Authorization</span> y en el valor pega la autorización.<br><button type="button" class="btn tonal small" data-act="copy-auth">Copiar autorización</button></div></li>' +
         '<li><div>En <strong>Solicitar cuerpo</strong> deja <strong>JSON</strong> y agrega dos campos de tipo <strong>Texto</strong>: clave <span class="mono">title</span> con el valor <span class="mono">Aviso</span>, y clave <span class="mono">body</span> con la variable <strong>Entrada del atajo</strong>.</div></li>' +
         '<li><div>Toca <strong>Listo</strong>. Con la próxima compra, el aviso llega solo al buzón y aparece aquí al abrir FAN.</div></li>' +
-        '</ol>' + note +
-        '<div class="stack"><button type="button" class="btn primary block" data-act="sync-now">Leer el buzón ahora</button>' +
+        '</ol></details>' +
+        '<div class="stack"><button type="button" class="btn primary block" data-act="sync-now">Leer todo el buzón ahora</button>' +
         '<button type="button" class="btn danger block" data-act="disconnect">Desconectar el buzón</button>' +
         '<button type="button" class="btn ghost block" data-act="cancel">Cerrar</button></div></div>';
     }
@@ -1005,6 +1126,7 @@ svg { display: block; }
     fitSheet();
     var target = document.getElementById(m === 'add' ? 'f-amount' : m === 'adjust' ? 'f-saldo' : m === 'paste' ? 'f-paste' : 'sheet-form');
     if (target) target.focus();
+    if (m === 'box' && prefs.repo && canSync) loadMails();
   }
   function closeSheet() {
     sheet = null; sheetEl.hidden = true; sheetEl.innerHTML = '';
@@ -1047,7 +1169,7 @@ svg { display: block; }
     if (!/^\d+$/.test(raw)) { setErr('Escribe el saldo en pesos, por ejemplo 850000.'); return; }
     if (+raw > MAX_AMOUNT) { setErr('El saldo es demasiado grande. Revisa los dígitos.'); return; }
     var prev = cfg, first = !cfg.at;
-    var next = { amount: +raw, at: todayKey() + 'T' + nowTime(), ignored: cfg.ignored };
+    var next = { amount: +raw, at: todayKey() + 'T' + nowTime(), ignored: cfg.ignored, acct: cfg.acct };
     busy = true;
     var ok = await commit([], [], next);
     busy = false;
@@ -1064,7 +1186,7 @@ svg { display: block; }
     var parsed = parseMail(text), res = pending(parsed, 'paste'), isNew = {};
     res.ups.forEach(function (u) { isNew[u.key] = 1; });
     out.innerHTML = parsed.found.map(function (p) {
-      return '<li><b>' + esc(p.merchant) + '</b><i>' + money(p.amount) + '</i><span>' + fmt(p.date) + ', ' + p.time + (isNew[p.key] ? '' : ' · Ya registrada') + '</span></li>';
+      return '<li><b>' + esc(p.merchant) + '</b><i>' + money(p.amount) + '</i><span>' + fmt(p.date) + ', ' + p.time + (isNew[p.key] ? '' : otherAcct(p) ? ' · De otra cuenta' : ' · Ya registrada') + '</span></li>';
     }).join('');
     out.hidden = !parsed.found.length;
     var k = res.ups.length;
@@ -1083,9 +1205,17 @@ svg { display: block; }
     if (a === 'copy-sender') { copyText(SENDER, 'Remitente copiado'); return; }
     if (a === 'copy-url') { copyText(API + prefs.repo + '/issues', 'Dirección copiada'); return; }
     if (a === 'copy-auth') { copyText('Bearer ' + prefs.token, 'Autorización copiada'); return; }
-    if (a === 'copy-note') { copyText(prefs.note ? prefs.note.text : '', 'Texto copiado'); return; }
+    if (a === 'copy-mails') { copyText(sheet.mails || '', 'Detalle copiado'); return; }
+    if (a === 'acct-clear') {
+      if (busy) return;
+      busy = true;
+      var okA = await commit([], [], { amount: cfg.amount, at: cfg.at, ignored: cfg.ignored, acct: '' });
+      busy = false;
+      if (okA) { closeSheet(); syncBox(true, true); }
+      return;
+    }
     if (a === 'paste-add') { importPaste(); return; }
-    if (a === 'sync-now') { closeSheet(); syncBox(true); return; }
+    if (a === 'sync-now') { closeSheet(); syncBox(true, true); return; }
     if (a === 'disconnect') {
       if (!sheet.del) { sheet.del = true; b.textContent = 'Toca de nuevo para desconectar'; b.classList.add('armed'); return; }
       prefs.repo = ''; prefs.token = ''; prefs.last = 0; prefs.note = null; syncErr = ''; savePrefs();
@@ -1109,7 +1239,7 @@ svg { display: block; }
       if (!sheet.del) { sheet.del = true; b.textContent = 'Toca de nuevo para eliminar'; b.classList.add('armed'); return; }
       if (busy) return;
       var prev = cfg, next = null;
-      if (p.key) next = { amount: cfg.amount, at: cfg.at, ignored: cfg.ignored.filter(function (x) { return x !== p.key; }).concat(p.key).slice(-MAX_IGNORED) };
+      if (p.key) next = { amount: cfg.amount, at: cfg.at, ignored: cfg.ignored.filter(function (x) { return x !== p.key; }).concat(p.key).slice(-MAX_IGNORED), acct: cfg.acct };
       busy = true;
       var ok = await commit([], [p.id], next);
       busy = false;
@@ -1158,6 +1288,7 @@ svg { display: block; }
     else if (a === 'paste') openSheet('paste');
     else if (a === 'box') openSheet('box');
     else if (a === 'sync') syncBox(true);
+    else if (a === 'acct') chooseAcct(b.getAttribute('data-a'));
     else if (a === 'order') { prefs.order = prefs.order === 'desc' ? 'asc' : 'desc'; savePrefs(); render(); }
     else if (a === 'filter') { filter = b.getAttribute('data-f'); shown = PAGE; render(); }
     else if (a === 'more') { shown += PAGE; render(); }
@@ -1206,7 +1337,7 @@ svg { display: block; }
     if (busy) return;
     var snap = items.slice(), prev = cfg;
     busy = true;
-    var ok = await commit([], snap.map(function (m) { return m.id; }), { amount: 0, at: '', ignored: [] });
+    var ok = await commit([], snap.map(function (m) { return m.id; }), { amount: 0, at: '', ignored: [], acct: '' });
     busy = false;
     if (ok) toast('Datos borrados', 'Deshacer', function () { commit(snap, [], prev); }, 9000);
   }

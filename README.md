@@ -49,7 +49,7 @@ Se configura una sola vez, en tres partes.
 ### 3. Crear la automatización en Atajos
 
 1. Abre **Atajos**, entra a **Automatización** y toca **+**.
-2. Elige **Correo electrónico** y en **Remitente** escribe `enviodigital@bancochile.cl`.
+2. Elige **Correo electrónico** y en **Remitente** escribe `enviodigital@bancochile.cl`. Si en Mail hay más de una cuenta de correo, elige en **Cuenta** la que recibe los avisos del banco, para que la automatización no tome los correos de las otras.
 3. Marca **Ejecutar inmediatamente**, toca **Siguiente** y elige **Nueva automatización en blanco**.
 4. Toca **Agregar acción**, busca «URL» y elige **Obtener contenido de URL**. En la URL pega `https://api.github.com/repos/tu-usuario/fan-avisos/issues`.
 5. Toca **Mostrar más** y en **Método** elige **POST**.
@@ -61,7 +61,9 @@ Notas:
 
 - Los avisos deben llegar a una cuenta agregada en la app Mail del iPhone. Los nombres de las opciones pueden variar un poco según la versión de iOS.
 - El token da acceso solo a los *issues* de ese repositorio privado. Queda guardado en Atajos y, dentro de FAN, solo en el dispositivo; no entra en los respaldos.
-- La automatización envía todos los correos de ese remitente. FAN usa los avisos de compra y deja pasar el resto; en **Buzón y atajo** muestra el último correo que no era una compra.
+- La automatización envía todos los correos de ese remitente que lleguen a la cuenta elegida. FAN registra las compras con cargo a la cuenta y deja fuera el resto, incluidas las compras con tarjeta de crédito y en dólares.
+- **Revisión del buzón.** En **Buzón y atajo**, FAN lista los últimos correos que llegaron y qué hizo con cada uno. Si un correo no está en esa lista, Atajos no lo envió; si está y dice que no se reconoce, se ve su texto. **Leer todo el buzón ahora** repasa el buzón completo.
+- **Una sola cuenta.** Si llegan compras de más de una cuenta, FAN pide elegir cuál sigue y deja fuera las demás.
 - Para comprobar que Atajos funciona, mira la pestaña **Issues** del repositorio después de una compra: debe aparecer un *issue* nuevo con el texto del correo.
 - Una compra eliminada en FAN no vuelve a aparecer al leer el buzón. Para recuperarla, se pega su aviso a mano.
 - La lectura del buzón funciona en la app publicada en GitHub Pages. Dentro de Claude, la página no puede llamar a GitHub y las compras se agregan pegando el aviso.
