@@ -68,6 +68,25 @@ Notas:
 - Una compra eliminada en FAN no vuelve a aparecer al leer el buzón. Para recuperarla, se pega su aviso a mano.
 - La lectura del buzón funciona en la app publicada en GitHub Pages. Dentro de Claude, la página no puede llamar a GitHub y las compras se agregan pegando el aviso.
 
+## Widget en la pantalla de inicio
+
+Muestra el saldo y las tres últimas compras. Una app web no puede crear widgets en iPhone, así que el widget se hace con **Scriptable**, una app gratuita que dibuja widgets a partir de un script.
+
+1. Instala **Scriptable** desde el App Store.
+2. En FAN, entra a **Buzón y atajo → Widget en la pantalla de inicio** y toca **Copiar el script del widget**. El script va completo, con el buzón y el token.
+3. Abre Scriptable, toca **+** y pega el script. Nómbralo **FAN** y ejecútalo con **▶**: debe mostrar el saldo.
+4. En la pantalla de inicio, mantén presionado un espacio vacío, toca **Editar → Agregar widget**, busca **Scriptable** y elige el tamaño mediano.
+5. Mantén presionado el widget nuevo, toca **Editar widget** y en **Script** elige **FAN**.
+
+Cómo funciona:
+
+- Al activarlo, FAN publica el saldo y las últimas compras en un hito (*milestone*) del repositorio privado del buzón. El script los lee y les suma las compras que llegaron al buzón después, así el widget se pone al día aunque no abras FAN.
+- iOS decide cada cuánto actualiza el widget, normalmente cada varios minutos. No es instantáneo.
+- Los depósitos y los ajustes de saldo solo existen dentro de FAN: el widget los refleja después de abrir la app.
+- Al tocar el widget se abre Scriptable, no FAN: iOS no permite abrir una app web instalada desde un widget.
+- También sirve en tamaño pequeño y en la pantalla bloqueada (rectangular).
+- **Desactivar el widget**, en la misma sección de FAN, deja de publicar y borra lo publicado.
+
 ## Instalar en el iPhone
 
 1. En GitHub, ve a **Settings → Pages** y publica la rama `main` desde la raíz (`/`). La app queda en `https://pablocarvallo.github.io/fan/`.
@@ -83,6 +102,7 @@ Se abre como app independiente, con su icono, y funciona sin conexión.
 | `index.html` | La app completa (HTML, CSS y JavaScript sin dependencias de compilación) |
 | `manifest.webmanifest` | Nombre, colores e iconos de la app instalada |
 | `sw.js` | Service worker para uso sin conexión |
+| `widget/fan-widget.js` | Script del widget para la app Scriptable (FAN lo entrega completo con el botón de copiar) |
 | `icons/icon-full.svg` | Icono original a pantalla completa (fuente de los PNG) |
 | `icons/icon.svg` | Icono con esquinas redondeadas (favicon) |
 | `icons/apple-touch-icon.png` | Icono de 180 px para la pantalla de inicio del iPhone |
@@ -94,7 +114,7 @@ Los movimientos y el saldo quedan en el `localStorage` del navegador, en el disp
 
 - `fan-movimientos`: cada movimiento con tipo (`c` compra o gasto, `d` depósito), fecha (`date`), hora (`time`), descripción (`desc`), monto en pesos (`amount`), origen (`mail` o `manual`) y, en las compras leídas de un aviso, la clave que evita duplicados (`key`).
 - `fan-cuenta`: el saldo ajustado (`amount`), cuándo se ajustó (`at`) y los avisos eliminados a propósito (`ignored`).
-- `fan-preferencias`: orden del listado, repositorio y token del buzón, y momento de la última lectura.
+- `fan-preferencias`: orden del listado, repositorio y token del buzón, momento de la última lectura y si el widget está activado.
 
 El saldo que se muestra es el saldo ajustado más los movimientos posteriores a ese ajuste. Los movimientos anteriores quedan como historial y no lo cambian.
 

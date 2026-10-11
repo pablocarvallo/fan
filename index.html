@@ -346,6 +346,9 @@ svg { display: block; }
   var SYNC_MARGIN = 15 * 60 * 1000;    // cada lectura repasa los últimos 15 minutos ya leídos
   // Si la app está en GitHub Pages, el buzón se sugiere en la misma cuenta
   var OWNER = /\.github\.io$/i.test(location.hostname) ? location.hostname.split('.')[0] : '';
+  var WIDGET_TITLE = 'FAN · widget';   // hito del buzón donde se publica el saldo para el widget
+  // Script del widget para la app Scriptable (el mismo de widget/fan-widget.js); al copiarlo se completa con el buzón y el token
+  var WIDGET_CODE = "// Variables used by Scriptable.\n// These must be at the very top of the file. Do not edit.\n// icon-color: purple; icon-glyph: wallet;\n\n// FAN · widget para la pantalla de inicio del iPhone (app Scriptable)\n//\n// Muestra el saldo de la cuenta y las tres últimas compras. Parte del saldo que FAN publica en el buzón\n// (el repositorio privado de GitHub) y le suma las compras que llegaron después, aunque no hayas abierto FAN.\n// No copies este archivo a mano: usa el botón «Copiar el script del widget» de FAN, que completa las dos\n// líneas siguientes con tu repositorio y tu token.\nconst REPO = '__REPO__';\nconst TOKEN = '__TOKEN__';\n\nconst API = 'https://api.github.com/repos/' + REPO;\nconst MS_TITLE = 'FAN · widget';\nconst MES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];\n\n/* ---------- Formatos ---------- */\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction dots(n) { return String(Math.round(Math.abs(n))).replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.'); }\nfunction money(n) { return (n < 0 ? '−' : '') + '$' + dots(n); }\nfunction hm(d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()); }\nfunction dayLabel(k) {\n  const t = new Date(), y = new Date(t.getFullYear(), t.getMonth(), t.getDate() - 1);\n  if (k === dayKey(t)) return 'hoy';\n  if (k === dayKey(y)) return 'ayer';\n  const p = k.split('-');\n  return (+p[2]) + ' ' + MES[+p[1] - 1];\n}\nfunction validDate(k) {\n  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(k)) return false;\n  const p = k.split('-'), d = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2]));\n  return d.getUTCFullYear() === +p[0] && d.getUTCMonth() === +p[1] - 1 && d.getUTCDate() === +p[2];\n}\n\n/* ---------- Lector de los avisos del banco (el mismo de FAN) ---------- */\nconst CP1252 = { 0x20ac: 0x80, 0x201a: 0x82, 0x0192: 0x83, 0x201e: 0x84, 0x2026: 0x85, 0x2020: 0x86, 0x2021: 0x87, 0x02c6: 0x88, 0x2030: 0x89, 0x0160: 0x8a,\n  0x2039: 0x8b, 0x0152: 0x8c, 0x017d: 0x8e, 0x2018: 0x91, 0x2019: 0x92, 0x201c: 0x93, 0x201d: 0x94, 0x2022: 0x95, 0x2013: 0x96, 0x2014: 0x97, 0x02dc: 0x98,\n  0x2122: 0x99, 0x0161: 0x9a, 0x203a: 0x9b, 0x0153: 0x9c, 0x017e: 0x9e, 0x0178: 0x9f };\nfunction contByte(ch) { let c = ch.charCodeAt(0); if (c > 0xff) c = CP1252[c] || 0; return c >= 0x80 && c <= 0xbf ? c : -1; }\nfunction demojibake(s) {\n  if (!/[ÂÃâ]/.test(s)) return s;\n  return s.replace(/[ÂÃ][^\\u0000-\\u007f]|â[^\\u0000-\\u007f]{2}/g, function (seq) {\n    const b1 = contByte(seq.charAt(1)), b2 = seq.length > 2 ? contByte(seq.charAt(2)) : 0;\n    if (b1 < 0 || b2 < 0) return seq;\n    return String.fromCharCode(seq.length > 2 ? (0x2 << 12) | ((b1 & 0x3f) << 6) | (b2 & 0x3f) : ((seq.charCodeAt(0) & 0x1f) << 6) | (b1 & 0x3f));\n  });\n}\nconst ENT = { nbsp: ' ', amp: '&', lt: '<', gt: '>', quot: '\"', apos: \"'\", dollar: '$', eacute: 'é', Eacute: 'É', aacute: 'á', iacute: 'í', oacute: 'ó', uacute: 'ú', ntilde: 'ñ', Ntilde: 'Ñ' };\nfunction plainText(s) {\n  s = String(s == null ? '' : s);\n  if (s.length > 400000) s = s.slice(-400000);\n  s = demojibake(s);\n  if (s.normalize) s = s.normalize('NFC');\n  if (/<[a-z!\\/][^>]*>/i.test(s)) s = s.replace(/<(script|style)\\b[\\s\\S]*?<\\/\\1>/gi, ' ').replace(/<[^>]+>/g, ' ');\n  s = s.replace(/&(#x?[0-9a-f]+|[a-z]+);/gi, function (all, e) {\n    if (e.charAt(0) === '#') {\n      const c = e.charAt(1).toLowerCase() === 'x' ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10);\n      return c > 0 && c < 0x10000 ? String.fromCharCode(c) : ' ';\n    }\n    return Object.prototype.hasOwnProperty.call(ENT, e) ? ENT[e] : all;\n  });\n  return s.replace(/[\\s ​‌‍﻿]+/g, ' ');\n}\nfunction clean(s) { return String(s == null ? '' : s).replace(/\\s+/g, ' ').trim().slice(0, 60); }\nfunction skel(key) {\n  const p = String(key).split('|');\n  return p[0] + '|' + (p[1] || '') + '|' + p.slice(2).join('').toUpperCase().replace(/[^A-Z0-9]/g, '');\n}\n// Devuelve las compras con cargo a la cuenta que trae un texto. Deja fuera las de tarjeta de crédito y en dólares.\nfunction parseMail(raw) {\n  const text = plainText(raw);\n  const re = /compra\\W{1,4}por\\W{1,4}?(US\\$|USD|\\$)?\\W{0,3}?([\\d.]+(?:,\\d{1,2})?)\\W{1,4}con\\W{1,4}(?:cargo\\W{1,4}a\\W{1,4})?(.{1,60}?)\\s+en\\s+(.{1,80}?)\\s+el\\s+(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})\\W{1,4}(\\d{1,2}):(\\d{2})/gi;\n  const out = [];\n  let m;\n  while ((m = re.exec(text))) {\n    const cur = (m[1] || '$').toUpperCase(), medio = m[3], merchant = clean(m[4]);\n    const amount = parseInt(m[2].replace(/\\./g, '').replace(/,.*$/, ''), 10);\n    const date = m[7] + '-' + pad(+m[6]) + '-' + pad(+m[5]), time = pad(+m[8]) + ':' + m[9];\n    if (!validDate(date) || !/^([01]\\d|2[0-3]):[0-5]\\d$/.test(time) || !merchant || !(amount > 0)) continue;\n    if (cur !== '$' || /cr.{0,12}dito/i.test(medio)) continue;\n    out.push({ d: date, h: time, c: merchant, m: amount, acct: (/(\\d{4})\\W*$/.exec(medio) || [])[1] || '',\n      key: date + 'T' + time + '|' + amount + '|' + merchant.toUpperCase() });\n  }\n  return out;\n}\n\n/* ---------- Datos ---------- */\nasync function gh(path) {\n  const r = new Request(API + path);\n  r.headers = { Authorization: 'Bearer ' + TOKEN, Accept: 'application/vnd.github+json' };\n  r.timeoutInterval = 20;\n  const data = await r.loadJSON();\n  const code = r.response && r.response.statusCode;\n  if (code && code >= 400) { const e = new Error('GitHub ' + code); e.status = code; throw e; }\n  return data;\n}\nfunction cachePath() { const fm = FileManager.local(); return fm.joinPath(fm.documentsDirectory(), 'fan-widget.json'); }\nfunction readCache() {\n  try { const fm = FileManager.local(), p = cachePath(); return fm.fileExists(p) ? JSON.parse(fm.readString(p)) : null; } catch (e) { return null; }\n}\nfunction writeCache(res) { try { FileManager.local().writeString(cachePath(), JSON.stringify(res)); } catch (e) {} }\n\n// Saldo publicado por FAN + compras que llegaron al buzón después de la última vez que FAN lo leyó\nasync function load() {\n  const list = await gh('/milestones?state=all&per_page=100');\n  const ms = (Array.isArray(list) ? list : []).filter(function (x) { return x && x.title === MS_TITLE; })[0];\n  let st = null;\n  try { st = ms && ms.description ? JSON.parse(ms.description) : null; } catch (e) { st = null; }\n  if (!st || st.app !== 'fan') return { msg: 'Abre FAN y activa el widget en «Buzón y atajo».' };\n\n  const known = {};\n  (st.keys || []).forEach(function (k) { known[k] = 1; });\n  const acct = /^\\d{4}$/.test(String(st.acct || '')) ? String(st.acct) : '';\n  const since = st.read > 0 ? '&since=' + encodeURIComponent(new Date(st.read - 30 * 60000).toISOString().replace(/\\.\\d+Z$/, 'Z')) : '';\n  const nuevas = [];\n  for (let page = 1; page <= 3; page++) {\n    const issues = await gh('/issues?state=all&sort=created&direction=asc&per_page=100&page=' + page + since);\n    if (!Array.isArray(issues)) break;\n    issues.forEach(function (it) {\n      if (!it || it.pull_request) return;\n      const title = String(it.title || '');\n      parseMail((title.length > 20 ? title + '\\n' : '') + String(it.body || '')).forEach(function (f) {\n        const sk = skel(f.key);\n        if (known[sk]) return;\n        known[sk] = 1;\n        if (acct && f.acct && f.acct !== acct) return;            // FAN sigue una sola cuenta\n        if (st.at && f.d + 'T' + f.h < st.at) return;             // anterior al último ajuste de saldo\n        nuevas.push(f);\n      });\n    });\n    if (issues.length < 100) break;\n  }\n  let saldo = typeof st.saldo === 'number' ? st.saldo : null;\n  if (saldo !== null) nuevas.forEach(function (f) { saldo -= f.m; });\n  const buys = (st.ult || []).concat(nuevas).filter(function (b) { return b && b.d && b.m > 0; })\n    .sort(function (a, b) { return (a.d + 'T' + a.h) < (b.d + 'T' + b.h) ? 1 : -1; }).slice(0, 3)\n    .map(function (b) { return { d: b.d, h: b.h, c: String(b.c || 'Compra'), m: b.m }; });\n  return { saldo: saldo, buys: buys, nuevas: nuevas.length, at: Date.now() };\n}\n\n/* ---------- Dibujo ---------- */\nconst WHITE = new Color('#ffffff'), GOLD = new Color('#ffcf70');\nfunction label(stack, str, size, color, opacity, bold) {\n  const t = stack.addText(str);\n  t.font = bold ? Font.boldSystemFont(size) : Font.systemFont(size);\n  t.textColor = color || WHITE;\n  if (opacity) t.textOpacity = opacity;\n  t.lineLimit = 1;\n  return t;\n}\nfunction build(res, family) {\n  const w = new ListWidget();\n  const lock = String(family || '').indexOf('accessory') === 0;\n  const small = family === 'small';\n  if (lock) {\n    // Pantalla bloqueada: saldo y última compra\n    label(w, 'FAN ' + (res.msg ? '' : res.saldo === null ? 'sin saldo' : money(res.saldo)), 14, null, 0, true).minimumScaleFactor = 0.6;\n    if (res.msg) label(w, res.msg, 11).lineLimit = 2;\n    else if (res.buys.length) label(w, res.buys[0].c + ' ' + money(-res.buys[0].m), 11).minimumScaleFactor = 0.7;\n    return w;\n  }\n  const g = new LinearGradient();\n  g.colors = [new Color('#873a9c'), new Color('#34113f')];\n  g.locations = [0, 1];\n  g.startPoint = new Point(0, 0);\n  g.endPoint = new Point(1, 1);\n  w.backgroundGradient = g;\n  w.setPadding(small ? 12 : 14, small ? 12 : 16, small ? 10 : 12, small ? 12 : 16);\n\n  const head = w.addStack();\n  head.layoutHorizontally();\n  head.centerAlignContent();\n  label(head, 'SALDO FAN', small ? 9 : 10, GOLD, 0, true);\n  head.addSpacer();\n  if (res.at) label(head, (res.old ? 'sin conexión · ' : '') + hm(new Date(res.at)), 9, WHITE, 0.6);\n  w.addSpacer(2);\n\n  if (res.msg) {\n    const t = label(w, res.msg, small ? 12 : 14, WHITE, 0.9);\n    t.lineLimit = 4;\n    w.addSpacer();\n    return w;\n  }\n  const total = label(w, res.saldo === null ? 'Sin definir' : money(res.saldo), small ? 22 : 28, WHITE, 0, true);\n  total.minimumScaleFactor = 0.5;\n  w.addSpacer(small ? 4 : 8);\n\n  if (!res.buys.length) label(w, 'Aún no hay compras', 12, WHITE, 0.7);\n  res.buys.forEach(function (b, i) {\n    if (i) w.addSpacer(small ? 2 : 4);\n    const row = w.addStack();\n    row.layoutHorizontally();\n    row.centerAlignContent();\n    if (!small) { label(row, dayLabel(b.d) + ' ' + b.h, 10, WHITE, 0.6); row.addSpacer(6); }\n    label(row, b.c, small ? 10 : 12, WHITE, 0.95);\n    row.addSpacer();\n    label(row, money(-b.m), small ? 10 : 12, WHITE, 0, true);\n  });\n  w.addSpacer();\n  return w;\n}\n\n/* ---------- Ejecución ---------- */\nlet res;\nif (/^__/.test(TOKEN) || /^__/.test(REPO)) {\n  res = { msg: 'Copia este script desde FAN, con el botón «Copiar el script del widget».' };\n} else {\n  try {\n    res = await load();\n    if (!res.msg) writeCache(res);\n  } catch (e) {\n    const c = readCache();\n    if (c && !c.msg) { res = c; res.old = true; }\n    else res = { msg: e && e.status === 401 ? 'El token venció. Copia de nuevo el script desde FAN.' : 'No se pudo leer el buzón. Revisa la conexión.' };\n  }\n}\nconst widget = build(res, config.widgetFamily);\nwidget.refreshAfterDate = new Date(Date.now() + 10 * 60 * 1000);\nif (config.runsInWidget) Script.setWidget(widget);\nelse await widget.presentMedium();\nScript.complete();\n";
 
   var MARK = '<circle cx="12" cy="8.4" r="5.4" fill="currentColor" opacity="0.5"/>' +
     '<path d="M2.6 11.3 12 16.9l9.4-5.6v7.6a2 2 0 0 1-2 2H4.6a2 2 0 0 1-2-2z" fill="currentColor"/>';
@@ -368,7 +371,8 @@ svg { display: block; }
   // últimos dígitos si es una sola, o '*' si se incluyen todas
   var cfg = { amount: 0, at: '', ignored: [], acct: '' };
   // De este dispositivo: orden del listado, buzón (repositorio y token), última lectura y último correo que no era una compra
-  var prefs = { order: 'desc', repo: '', token: '', last: 0, note: null, v: 2 };
+  // widget: si se publica el saldo para el widget; wm: número del hito; wSig: huella de lo último publicado; wAt: cuándo
+  var prefs = { order: 'desc', repo: '', token: '', last: 0, note: null, v: 2, widget: false, wm: 0, wSig: '', wAt: 0 };
   var filter = 'all';                               // 'all' | 'c' compras y gastos | 'd' depósitos
   var shown = PAGE;
   var fresh = {};                                   // movimientos recién traídos, para marcarlos como nuevos
@@ -552,6 +556,10 @@ svg { display: block; }
       prefs.last = prefs.repo && +p.last > 0 ? +p.last : 0;
       prefs.note = prefs.repo && p.note && typeof p.note.text === 'string' ? { text: p.note.text.slice(0, 600), at: +p.note.at || 0 } : null;
       if (!(+p.v >= 2)) prefs.last = 0;   // tras esta versión, la primera lectura repasa el buzón completo
+      prefs.widget = !!(prefs.repo && p.widget);
+      prefs.wm = prefs.widget && +p.wm > 0 ? Math.round(+p.wm) : 0;
+      prefs.wSig = prefs.widget && typeof p.wSig === 'string' ? p.wSig.slice(0, 40) : '';
+      prefs.wAt = prefs.widget && +p.wAt > 0 ? +p.wAt : 0;
     } catch (e) {}
   }
   function savePrefs() { try { localStorage.setItem(LS_PREFS, JSON.stringify(prefs)); } catch (e) {} }
@@ -870,6 +878,63 @@ svg { display: block; }
     toast('Buzón conectado. ' + (r.added || r.removed ? addedMsg(r, box.parsed) : box.parsed.found.length ? 'Sus compras ya estaban registradas.' : 'Aún no tiene avisos: llegarán con tu próxima compra.'), null, null, 6500);
   }
 
+  /* ---------- Widget de la pantalla de inicio (app Scriptable) ---------- */
+  // Una app web no puede crear widgets. FAN publica el saldo y las últimas compras en un hito del buzón y el script
+  // de Scriptable los dibuja, sumando las compras que llegaron al buzón después. Solo se publica si se activa el widget.
+  var widgetTimer = 0, widgetBusy = false, widgetErr = '';
+  function widgetState() {
+    var c = compute(), cut = dayKey(new Date(Date.now() - 5 * 86400000)), keys = [], buys = [];
+    for (var i = items.length - 1; i >= 0 && buys.length < 3; i--) {
+      if (items[i].type === 'c') buys.push({ d: items[i].date, h: items[i].time, c: items[i].desc, m: items[i].amount });
+    }
+    items.forEach(function (m) { if (m.key && m.date >= cut) keys.push(skel(m.key)); });      // compras recientes ya contadas
+    cfg.ignored.slice(-80).forEach(function (k) { keys.push(skel(k)); });                      // y las eliminadas a propósito
+    return { v: 1, app: 'fan', saldo: cfg.at ? c.balance : null, at: cfg.at, acct: cfg.acct, read: prefs.last || 0, ult: buys, keys: keys };
+  }
+  async function ghJson(method, path, body) {
+    var res = await fetch(API + prefs.repo + path, {
+      method: method, cache: 'no-store', body: body ? JSON.stringify(body) : undefined,
+      headers: { Authorization: 'Bearer ' + prefs.token, Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' }
+    });
+    if (!res.ok) throw fetchError(res.status);
+    return res.json();
+  }
+  async function publishWidget() {
+    if (!canSync || !prefs.repo || !prefs.widget || widgetBusy || loading) return;
+    var st = widgetState(), sig = hash(JSON.stringify(st));
+    if (sig === prefs.wSig && prefs.wm) return;
+    widgetBusy = true;
+    try {
+      st.t = Date.now();
+      var desc = JSON.stringify(st);
+      if (!prefs.wm) {
+        var list = await ghJson('GET', '/milestones?state=all&per_page=100');
+        var found = (Array.isArray(list) ? list : []).filter(function (x) { return x && x.title === WIDGET_TITLE; })[0];
+        prefs.wm = found ? found.number : (await ghJson('POST', '/milestones', { title: WIDGET_TITLE, state: 'closed', description: desc })).number;
+        if (found) await ghJson('PATCH', '/milestones/' + prefs.wm, { description: desc });
+      } else {
+        await ghJson('PATCH', '/milestones/' + prefs.wm, { description: desc });
+      }
+      prefs.wSig = sig; prefs.wAt = Date.now(); widgetErr = '';
+    } catch (e) {
+      if (e && e.status === 404) prefs.wm = 0;   // el hito ya no existe: se vuelve a crear en el próximo intento
+      widgetErr = errCode(e);
+    }
+    savePrefs();
+    widgetBusy = false;
+  }
+  function queueWidget() {
+    if (!prefs.widget) return;
+    clearTimeout(widgetTimer);
+    widgetTimer = setTimeout(publishWidget, 1200);
+  }
+  async function widgetOff() {
+    var n = prefs.wm;
+    prefs.widget = false; prefs.wSig = ''; prefs.wAt = 0; savePrefs();
+    clearTimeout(widgetTimer);
+    if (n) { try { await ghJson('PATCH', '/milestones/' + n, { description: '' }); } catch (e) {} }   // no deja el saldo guardado en el buzón
+  }
+
   /* ---------- Vistas ---------- */
   function header() {
     return '<header class="top"><span class="mark">' + I_MARK + '</span><div><div class="eyebrow">Cuenta · registro personal</div><h1>FAN</h1></div></header>';
@@ -1008,6 +1073,7 @@ svg { display: block; }
     var wasOpen = open && open.open, bk = document.getElementById('bk-text'), bkVal = bk ? bk.value : '';
     app.innerHTML = h;
     restoreArmed = false; wipeArmed = false;
+    queueWidget();
     if (wasOpen) { var d = app.querySelector('.backup'); if (d) { d.open = true; document.getElementById('bk-text').value = bkVal; } }
   }
 
@@ -1094,6 +1160,21 @@ svg { display: block; }
         '<li><div>En <strong>Solicitar cuerpo</strong> deja <strong>JSON</strong> y agrega dos campos de tipo <strong>Texto</strong>: clave <span class="mono">title</span> con el valor <span class="mono">Aviso</span>, y clave <span class="mono">body</span> con la variable <strong>Entrada del atajo</strong>.</div></li>' +
         '<li><div>Toca <strong>Listo</strong>. Con la próxima compra, el aviso llega solo al buzón y aparece aquí al abrir FAN.</div></li>' +
         '</ol></details>' +
+        '<details class="how"><summary>Widget en la pantalla de inicio</summary>' +
+        '<p class="sub">Muestra el saldo y las tres últimas compras. Se hace con la app gratuita Scriptable, porque una app web no puede crear widgets por sí sola.</p>' +
+        '<ol class="guide">' +
+        '<li><div>Instala <strong>Scriptable</strong> desde el App Store.</div></li>' +
+        '<li><div>Copia el script. Ya va completo, con tu buzón y tu token.<br><button type="button" class="btn tonal small" data-act="copy-widget">Copiar el script del widget</button></div></li>' +
+        '<li><div>Abre Scriptable, toca <strong>+</strong> y pega el script. Toca el título de arriba y nómbralo <strong>FAN</strong>. Ejecútalo con <strong>▶</strong>: debe mostrar el saldo.</div></li>' +
+        '<li><div>En la pantalla de inicio, mantén presionado un espacio vacío, toca <strong>Editar</strong> y <strong>Agregar widget</strong>. Busca <strong>Scriptable</strong> y elige el tamaño mediano.</div></li>' +
+        '<li><div>Mantén presionado el widget nuevo, toca <strong>Editar widget</strong> y en <strong>Script</strong> elige <strong>FAN</strong>.</div></li>' +
+        '</ol>' +
+        '<p class="note">' + (prefs.widget
+          ? '<strong>Widget activado.</strong> ' + (widgetErr ? 'No se pudieron enviar los datos: ' + esc(errMsg(widgetErr)) : prefs.wAt ? 'Datos enviados ' + ago(prefs.wAt) + '.' : 'Enviando los datos…') + ' '
+          : '') +
+        'Para el widget, FAN guarda el saldo y las últimas compras en tu repositorio privado, y el script lleva tu token. iOS decide cada cuánto lo actualiza, normalmente cada varios minutos.' +
+        (prefs.widget ? '<br><button type="button" class="btn ghost small" data-act="widget-off">Desactivar el widget</button>' : '') + '</p>' +
+        '</details>' +
         '<div class="stack"><button type="button" class="btn primary block" data-act="sync-now">Leer todo el buzón ahora</button>' +
         '<button type="button" class="btn danger block" data-act="disconnect">Desconectar el buzón</button>' +
         '<button type="button" class="btn ghost block" data-act="cancel">Cerrar</button></div></div>';
@@ -1222,6 +1303,13 @@ svg { display: block; }
     if (a === 'copy-url') { copyText(API + prefs.repo + '/issues', 'Dirección copiada'); return; }
     if (a === 'copy-auth') { copyText('Bearer ' + prefs.token, 'Autorización copiada'); return; }
     if (a === 'copy-mails') { copyText(sheet.mails || '', 'Detalle copiado'); return; }
+    if (a === 'copy-widget') {
+      copyText(WIDGET_CODE.replace('__REPO__', function () { return prefs.repo; }).replace('__TOKEN__', function () { return prefs.token; }), 'Script copiado. El widget quedó activado.');
+      if (!prefs.widget) { prefs.widget = true; savePrefs(); }
+      publishWidget();
+      return;
+    }
+    if (a === 'widget-off') { await widgetOff(); closeSheet(); toast('Widget desactivado. Puedes quitarlo de la pantalla de inicio.'); return; }
     if (a === 'acct-all' || a === 'acct-one') {
       if (busy) return;
       busy = true;
@@ -1237,7 +1325,8 @@ svg { display: block; }
     if (a === 'sync-now') { closeSheet(); syncBox(true, true); return; }
     if (a === 'disconnect') {
       if (!sheet.del) { sheet.del = true; b.textContent = 'Toca de nuevo para desconectar'; b.classList.add('armed'); return; }
-      prefs.repo = ''; prefs.token = ''; prefs.last = 0; prefs.note = null; syncErr = ''; savePrefs();
+      if (prefs.widget) await widgetOff();
+      prefs.repo = ''; prefs.token = ''; prefs.last = 0; prefs.note = null; prefs.wm = 0; syncErr = ''; savePrefs();
       closeSheet(); render();
       toast('Buzón desconectado. Tus movimientos siguen aquí.');
       return;
