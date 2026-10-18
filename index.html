@@ -9,102 +9,170 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="FAN">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#f3f1f5" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#130d18" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#DFE9FD" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#13244A" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="icons/icon.svg?v=2">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=2">
 <!--STANDALONE:END-->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
 <style>
 /* Concepto: una cartola de bolsillo. Arriba el saldo, en una tarjeta ciruela con el sobre y la moneda en dorado;
    debajo las dos acciones (actualizar desde el buzón de avisos, anotar un depósito) y el listado de movimientos,
    cada uno con el saldo que dejó. Ciruela como acento, dorado solo en esa marca, verde solo para el dinero que entra. */
+/*DS:TOKENS:START*/
+/* ── Domésticas · sistema de diseño común (v1) ──────────────────────────────
+   Paleta: #2950F4 · #4D78F3 · #719DF6 · #99C2F8 · #BDEBFB, con el azul marino #182D4A de fondo oscuro.
+   Estilo iOS 27: tipografía del sistema (SF Pro), tarjetas blancas sobre fondo agrupado,
+   barras y botones de vidrio, cápsulas, esquinas amplias. Igual en todas las apps de la casa. */
 :root {
-  --bg: #f3f1f5;
-  --surface: #ffffff;
-  --ink: #1d1424;
-  --muted: #645a6e;
-  --line: #dcd6e2;
-  --track: #e9e4ee;
-  --accent: #6b2a7a;
-  --accent-bg: #f0e3f4;
-  --on-accent: #ffffff;
-  --in: #17713a;
-  --in-bg: #e0f2e6;
-  --over: #b42318;
-  --over-bg: #fdecea;
-  --card-a: #873a9c;
-  --card-b: #34113f;
-  --card-shade: rgba(28, 6, 36, 0.4);
-  --on-card: #ffffff;
-  --on-card-muted: rgba(255, 255, 255, 0.82);
-  --on-card-line: rgba(255, 255, 255, 0.24);
-  --gold: #ffb83d;
-  --gold-soft: #ffe2a6;
-  --scrim: rgba(20, 10, 26, 0.5);
-  --font-display: "Familjen Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-body: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ds-b1: #2950F4; --ds-b2: #4D78F3; --ds-b3: #719DF6; --ds-b4: #99C2F8; --ds-b5: #BDEBFB; --ds-navy: #182D4A;
+  --ds-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", system-ui, "Helvetica Neue", Arial, sans-serif;
+  --ds-font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro", system-ui, "Helvetica Neue", Arial, sans-serif;
+  --ds-font-round: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --ds-font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --ds-r-card: 24px; --ds-r-inner: 16px; --ds-r-field: 14px; --ds-r-sheet: 34px; --ds-r-pill: 999px;
+
+  --ds-bg: #EFF3FB;
+  --ds-bg-top: #DFE9FD;
+  --ds-surface: #FFFFFF;
+  --ds-surface-2: #F3F6FD;
+  --ds-fill: rgba(41, 80, 244, 0.07);
+  --ds-fill-2: rgba(41, 80, 244, 0.13);
+  --ds-ink: #0E1B33;
+  --ds-ink-2: #55617A;
+  --ds-ink-3: #8691A8;
+  --ds-line: rgba(24, 45, 74, 0.12);
+  --ds-line-2: rgba(24, 45, 74, 0.2);
+  --ds-tint: #2950F4;
+  --ds-tint-soft: #E5ECFE;
+  --ds-btn: #2950F4;
+  --ds-on-btn: #FFFFFF;
+  --ds-pos: #157A43; --ds-pos-soft: #DDF4E6;
+  --ds-neg: #D1281C; --ds-neg-soft: #FDE8E6;
+  --ds-warn: #A35500; --ds-warn-soft: #FFF0D9;
+  --ds-hero: radial-gradient(120% 90% at 100% 0%, rgba(189, 235, 251, 0.45) 0%, rgba(189, 235, 251, 0) 55%), linear-gradient(150deg, #4D78F3 0%, #2950F4 58%, #2141D6 100%);
+  --ds-hero-ink: #FFFFFF;
+  --ds-hero-ink-2: rgba(255, 255, 255, 0.84);
+  --ds-hero-line: rgba(255, 255, 255, 0.28);
+  --ds-hero-glass: rgba(255, 255, 255, 0.18);
+  --ds-glass: rgba(255, 255, 255, 0.7);
+  --ds-glass-strong: rgba(255, 255, 255, 0.86);
+  --ds-glass-line: rgba(255, 255, 255, 0.85);
+  --ds-glass-edge: rgba(14, 27, 51, 0.1);
+  --ds-glass-blur: blur(22px) saturate(1.8);
+  --ds-shadow-1: 0 1px 2px rgba(24, 45, 74, 0.05), 0 4px 14px rgba(24, 45, 74, 0.05);
+  --ds-shadow-2: 0 12px 32px rgba(24, 45, 74, 0.16), 0 2px 8px rgba(24, 45, 74, 0.08);
+  --ds-shadow-btn: inset 0 1px 0 rgba(255, 255, 255, 0.32), 0 6px 16px rgba(41, 80, 244, 0.26);
+  --ds-scrim: rgba(14, 27, 51, 0.36);
+  --ds-chart-1: #2950F4; --ds-chart-2: #719DF6; --ds-chart-3: #99C2F8; --ds-chart-4: #BDEBFB;
   color-scheme: light;
-  box-sizing: border-box;
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #130d18;
-    --surface: #1e1626;
-    --ink: #efe9f4;
-    --muted: #a99db5;
-    --line: #35293f;
-    --track: #2a2033;
-    --accent: #dba8ea;
-    --accent-bg: #3a2247;
-    --on-accent: #2a0c33;
-    --in: #74d394;
-    --in-bg: #173322;
-    --over: #ff9b92;
-    --over-bg: #3b1f1d;
-    --card-a: #7a3190;
-    --card-b: #2b0e35;
-    --card-shade: rgba(14, 3, 20, 0.5);
-    --on-card: #ffffff;
-    --on-card-muted: rgba(255, 255, 255, 0.82);
-    --on-card-line: rgba(255, 255, 255, 0.22);
-    --gold: #ffb83d;
-    --gold-soft: #ffe2a6;
-    --scrim: rgba(0, 0, 0, 0.64);
+    --ds-bg: #0A1224;
+    --ds-bg-top: #13244A;
+    --ds-surface: #152340;
+    --ds-surface-2: #1C2C4D;
+    --ds-fill: rgba(113, 157, 246, 0.12);
+    --ds-fill-2: rgba(113, 157, 246, 0.2);
+    --ds-ink: #EEF3FF;
+    --ds-ink-2: #A9B6D0;
+    --ds-ink-3: #77859F;
+    --ds-line: rgba(189, 235, 251, 0.11);
+    --ds-line-2: rgba(189, 235, 251, 0.2);
+    --ds-tint: #8EB0FA;
+    --ds-tint-soft: rgba(113, 157, 246, 0.18);
+    --ds-btn: #3A62F5;
+    --ds-on-btn: #FFFFFF;
+    --ds-pos: #5DD68E; --ds-pos-soft: rgba(93, 214, 142, 0.14);
+    --ds-neg: #FF8A80; --ds-neg-soft: rgba(255, 138, 128, 0.14);
+    --ds-warn: #FFB65C; --ds-warn-soft: rgba(255, 182, 92, 0.14);
+    --ds-hero: radial-gradient(120% 90% at 100% 0%, rgba(189, 235, 251, 0.28) 0%, rgba(189, 235, 251, 0) 55%), linear-gradient(150deg, #3D68F2 0%, #2950F4 55%, #1C38C2 100%);
+    --ds-glass: rgba(24, 40, 70, 0.62);
+    --ds-glass-strong: rgba(24, 40, 70, 0.84);
+    --ds-glass-line: rgba(255, 255, 255, 0.14);
+    --ds-glass-edge: rgba(0, 0, 0, 0.4);
+    --ds-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --ds-shadow-2: 0 14px 36px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
+    --ds-shadow-btn: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 6px 16px rgba(0, 0, 0, 0.35);
+    --ds-scrim: rgba(0, 0, 0, 0.55);
+    --ds-chart-1: #719DF6; --ds-chart-2: #4D78F3; --ds-chart-3: #99C2F8; --ds-chart-4: #BDEBFB;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #130d18;
-  --surface: #1e1626;
-  --ink: #efe9f4;
-  --muted: #a99db5;
-  --line: #35293f;
-  --track: #2a2033;
-  --accent: #dba8ea;
-  --accent-bg: #3a2247;
-  --on-accent: #2a0c33;
-  --in: #74d394;
-  --in-bg: #173322;
-  --over: #ff9b92;
-  --over-bg: #3b1f1d;
-  --card-a: #7a3190;
-  --card-b: #2b0e35;
-  --card-shade: rgba(14, 3, 20, 0.5);
-  --on-card: #ffffff;
-  --on-card-muted: rgba(255, 255, 255, 0.82);
-  --on-card-line: rgba(255, 255, 255, 0.22);
-  --gold: #ffb83d;
-  --gold-soft: #ffe2a6;
-  --scrim: rgba(0, 0, 0, 0.64);
+  --ds-bg: #0A1224;
+  --ds-bg-top: #13244A;
+  --ds-surface: #152340;
+  --ds-surface-2: #1C2C4D;
+  --ds-fill: rgba(113, 157, 246, 0.12);
+  --ds-fill-2: rgba(113, 157, 246, 0.2);
+  --ds-ink: #EEF3FF;
+  --ds-ink-2: #A9B6D0;
+  --ds-ink-3: #77859F;
+  --ds-line: rgba(189, 235, 251, 0.11);
+  --ds-line-2: rgba(189, 235, 251, 0.2);
+  --ds-tint: #8EB0FA;
+  --ds-tint-soft: rgba(113, 157, 246, 0.18);
+  --ds-btn: #3A62F5;
+  --ds-on-btn: #FFFFFF;
+  --ds-pos: #5DD68E; --ds-pos-soft: rgba(93, 214, 142, 0.14);
+  --ds-neg: #FF8A80; --ds-neg-soft: rgba(255, 138, 128, 0.14);
+  --ds-warn: #FFB65C; --ds-warn-soft: rgba(255, 182, 92, 0.14);
+  --ds-hero: radial-gradient(120% 90% at 100% 0%, rgba(189, 235, 251, 0.28) 0%, rgba(189, 235, 251, 0) 55%), linear-gradient(150deg, #3D68F2 0%, #2950F4 55%, #1C38C2 100%);
+  --ds-glass: rgba(24, 40, 70, 0.62);
+  --ds-glass-strong: rgba(24, 40, 70, 0.84);
+  --ds-glass-line: rgba(255, 255, 255, 0.14);
+  --ds-glass-edge: rgba(0, 0, 0, 0.4);
+  --ds-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --ds-shadow-2: 0 14px 36px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
+  --ds-shadow-btn: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 6px 16px rgba(0, 0, 0, 0.35);
+  --ds-scrim: rgba(0, 0, 0, 0.55);
+  --ds-chart-1: #719DF6; --ds-chart-2: #4D78F3; --ds-chart-3: #99C2F8; --ds-chart-4: #BDEBFB;
   color-scheme: dark;
 }
-html.lock { overflow: hidden; }
+html { background: var(--ds-bg); }
+body {
+  font-family: var(--ds-font);
+  background: linear-gradient(180deg, var(--ds-bg-top) 0, var(--ds-bg) 340px) no-repeat, var(--ds-bg);
+  color: var(--ds-ink);
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.012em;
+}
+/* ── fin de los tokens comunes ── */
+
+/* Variables propias de las apps de cuentas, ahora tomadas del sistema común */
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+:root:not([data-ds]), :root[data-theme] {
+  --bg: var(--ds-bg); --surface: var(--ds-surface); --ink: var(--ds-ink); --muted: var(--ds-ink-2); --line: var(--ds-line-2);
+  --track: var(--ds-fill); --seg-on: var(--ds-surface); --accent: var(--ds-tint); --accent-bg: var(--ds-tint-soft); --on-accent: var(--ds-on-btn);
+  --in: var(--ds-pos); --in-bg: var(--ds-pos-soft); --over: var(--ds-neg); --over-bg: var(--ds-neg-soft);
+  --card-a: var(--ds-b2); --card-b: var(--ds-b1); --card-shade: rgba(14, 27, 80, 0.32); --card-edge: rgba(255, 255, 255, 0.22);
+  --on-card: var(--ds-hero-ink); --on-card-muted: var(--ds-hero-ink-2); --on-card-line: var(--ds-hero-line);
+  --lime: #FFFFFF; --lime-ink: var(--ds-b1); --warn-soft: #FFE3A3; --busy: #F5A524; --scrim: var(--ds-scrim);
+  --gold: var(--ds-b5); --gold-soft: #FFE3A3; --gold-line: var(--ds-b2);
+  --ember: var(--ds-b5); --amber: #FFE3A3; --alarm: #FF8A80;
+  --dot-1: var(--ds-b5); --dot-2: var(--ds-b4); --dot-3: var(--ds-b3); --dot-4: #FFFFFF;
+  --tit: var(--ds-b1); --tit-ink: #2141D6; --tit-bg: var(--ds-tint-soft);
+  --adi: #2E9BD6; --adi-ink: #146896; --adi-bg: #DDF3FC;
+  --font-display: var(--ds-font-display); --font-body: var(--ds-font);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --tit: #8EB0FA; --tit-ink: #B9CDFC; --tit-bg: rgba(113, 157, 246, 0.18);
+    --adi: #7FD3F5; --adi-ink: #BDEBFB; --adi-bg: rgba(127, 211, 245, 0.15);
+  }
+}
+:root[data-theme="dark"] {
+  --tit: #8EB0FA; --tit-ink: #B9CDFC; --tit-bg: rgba(113, 157, 246, 0.18);
+  --adi: #7FD3F5; --adi-ink: #BDEBFB; --adi-bg: rgba(127, 211, 245, 0.15);
+}
+
+/*DS:TOKENS:END*/html.lock { overflow: hidden; }
 [hidden]:not([hidden=until-found i]) { display: none !important; }
 body {
   margin: 0;
@@ -313,6 +381,166 @@ svg { display: block; }
 }
 .toast.top { bottom: auto; top: calc(12px + env(safe-area-inset-top, 0px)); }
 .toast button { background: none; border: 0; padding: 0 4px; min-height: 44px; color: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; flex: none; }
+
+/*DS:LAYER:START*/
+/* ── Domésticas · base común (v1) ── */
+html { background: var(--ds-bg); }
+body {
+  font-family: var(--ds-font);
+  background: linear-gradient(180deg, var(--ds-bg-top) 0, var(--ds-bg) 360px) no-repeat, var(--ds-bg);
+  color: var(--ds-ink);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+h1, h2, h3, h4 { font-family: var(--ds-font-display); letter-spacing: -0.022em; }
+button, input, select, textarea { font-family: inherit; }
+::selection { background: var(--ds-tint-soft); }
+:focus-visible { outline-color: var(--ds-tint); }
+input, select, textarea { accent-color: var(--ds-btn); caret-color: var(--ds-tint); }
+@keyframes ds-rise { from { transform: translateY(28px); opacity: 0; } to { transform: none; opacity: 1; } }
+/* ── fin de la base común ── */
+
+/* ── Domésticas · componentes (familia de cuentas: Copec, FAN, Master, LiderBCI) ── */
+body { font-size: 17px; line-height: 1.38; }
+.app { gap: 20px; padding-block: 14px 48px; }
+.eyebrow { font-size: 13px; font-weight: 600; text-transform: none; letter-spacing: -0.005em; color: var(--ds-ink-2); }
+.muted { color: var(--ds-ink-2); }
+
+/* Encabezado con título grande */
+.top { gap: 12px; padding-top: 6px; }
+.top h1 { font-size: 34px; line-height: 1.08; font-weight: 700; letter-spacing: -0.03em; }
+.mark {
+  width: 46px; height: 46px; border-radius: 13px; color: #fff; background: var(--ds-hero);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), inset 0 -1px 0 rgba(14, 27, 51, 0.18), 0 4px 12px rgba(41, 80, 244, 0.28);
+}
+.mark svg, .mark img { filter: drop-shadow(0 1px 1px rgba(14, 27, 51, 0.25)); }
+
+/* Botones: cápsulas, relleno sólido o tintado */
+.btn {
+  min-height: 50px; border-radius: var(--ds-r-pill); border: 0; font-size: 17px; font-weight: 600; letter-spacing: -0.01em;
+  transition: transform 0.16s ease, opacity 0.16s ease, background-color 0.16s ease;
+}
+.btn:active { transform: scale(0.97); opacity: 0.88; }
+.btn.primary { background: var(--ds-btn); color: var(--ds-on-btn); box-shadow: var(--ds-shadow-btn); }
+.btn.tonal { background: var(--ds-tint-soft); color: var(--ds-tint); }
+.btn.ghost { background: var(--ds-surface); color: var(--ds-tint); border: 0; box-shadow: var(--ds-shadow-1); }
+.btn.plus { background: var(--ds-surface); color: var(--ds-pos); border: 0; box-shadow: var(--ds-shadow-1); }
+.btn.danger { background: var(--ds-neg-soft); color: var(--ds-neg); border: 0; }
+.btn.danger.armed { background: var(--ds-neg); color: #fff; }
+.btn.small { min-height: 40px; padding: 0 16px; font-size: 15px; }
+.btn.big { min-height: 58px; border-radius: 20px; font-size: 16px; line-height: 1.2; }
+.linkbtn { color: var(--ds-tint); text-decoration: none; font-size: 15px; }
+
+/* Tarjeta principal: degradado de la paleta con brillo de vidrio */
+.hero {
+  border-radius: 28px; padding: 20px 20px 18px; background: var(--ds-hero); color: var(--ds-hero-ink);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38), inset 0 -1px 0 rgba(14, 27, 51, 0.16), 0 16px 34px rgba(41, 80, 244, 0.26);
+}
+.hero::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 38%); }
+.hero-mark, .hero-art { opacity: 0.12; }
+.hero .eyebrow, .hero-note { color: var(--ds-hero-ink-2); }
+.hero-btn, .hero .chip, .hero button.ghost {
+  background: var(--ds-hero-glass); border: 0.5px solid rgba(255, 255, 255, 0.45); color: #fff;
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+.hero-cta { border-radius: var(--ds-r-pill); background: #fff; color: var(--ds-b1); font-weight: 700; padding: 0 20px; box-shadow: 0 6px 16px rgba(14, 27, 51, 0.2); }
+.total { font-family: var(--ds-font-round); font-weight: 700; letter-spacing: -0.025em; }
+.hero-stats { border-top-color: var(--ds-hero-line); }
+.hero-stats dt { color: var(--ds-hero-ink-2); }
+
+/* Encabezados de sección */
+.sec-head h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.025em; }
+.sync { color: var(--ds-ink-2); }
+
+/* Listas agrupadas (estilo Ajustes de iOS) */
+.list, .steps {
+  gap: 0; background: var(--ds-surface); border-radius: var(--ds-r-card); overflow: hidden; box-shadow: var(--ds-shadow-1);
+}
+.row, .step {
+  position: relative; border: 0; border-radius: 0; background: transparent; min-height: 60px; padding: 11px 16px 11px 14px;
+}
+.row:active, .step:active { background: var(--ds-fill); }
+.row.old { background: transparent; opacity: 0.62; }
+.list > li + li > .row::before, .steps > li + li > .step::before {
+  content: ""; position: absolute; top: 0; right: 0; left: 64px; border-top: 0.5px solid var(--ds-line-2);
+}
+.ico { width: 38px; height: 38px; background: var(--ds-fill); color: var(--ds-ink-2); }
+.ico.in { background: var(--ds-pos-soft); color: var(--ds-pos); }
+.ico.auto { background: var(--ds-tint-soft); color: var(--ds-tint); }
+.store { font-weight: 600; }
+.meta, .run { color: var(--ds-ink-2); }
+.amt { font-weight: 600; }
+.amt.in { color: var(--ds-pos); }
+.tag { background: var(--ds-tint-soft); color: var(--ds-tint); }
+.step-n { background: var(--ds-tint-soft); color: var(--ds-tint); }
+.step.done .step-n { background: var(--ds-pos-soft); color: var(--ds-pos); }
+.step-t span { color: var(--ds-ink-2); }
+.anchor { color: var(--ds-ink-3); padding: 8px 16px; }
+.anchor::before, .anchor::after { border-top: 0.5px solid var(--ds-line-2); }
+.empty { border: 0; border-radius: var(--ds-r-card); background: var(--ds-surface); box-shadow: var(--ds-shadow-1); color: var(--ds-ink-2); padding: 18px; }
+.foot { color: var(--ds-ink-3); }
+
+/* Filtros en cápsula */
+.chip { border: 0; background: var(--ds-fill); color: var(--ds-ink); font-weight: 600; min-height: 36px; padding: 0 15px; }
+.chip[aria-pressed="true"] { background: var(--ds-btn); color: #fff; }
+
+/* Datos y respaldo */
+.backup { border: 0; border-radius: var(--ds-r-card); background: var(--ds-surface); box-shadow: var(--ds-shadow-1); }
+.backup textarea, .field textarea { border: 0; border-radius: var(--ds-r-field); background: var(--ds-surface-2); }
+
+/* Hojas (sheets) */
+.backdrop { background: var(--ds-scrim); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
+.panel {
+  background: var(--ds-surface); border-radius: var(--ds-r-sheet) var(--ds-r-sheet) 0 0; padding-top: 30px;
+  box-shadow: 0 -10px 40px rgba(14, 27, 51, 0.18); animation: ds-rise 0.28s cubic-bezier(0.2, 0.9, 0.25, 1);
+}
+.panel::before { content: ""; position: absolute; top: 8px; left: 50%; width: 38px; height: 5px; margin-left: -19px; border-radius: 3px; background: var(--ds-line-2); }
+.panel h2 { font-size: 24px; font-weight: 700; }
+.panel .sub { color: var(--ds-ink-2); }
+.field > span { font-size: 13px; font-weight: 600; color: var(--ds-ink-2); padding-left: 4px; }
+.field input[type="date"], .field input[type="time"], .field input[type="text"], .field input[type="url"], .field input[type="number"], .field input:not([type]), .field select {
+  border: 1.5px solid transparent; border-radius: var(--ds-r-field); background: var(--ds-surface-2); min-height: 50px;
+}
+.field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--ds-tint); box-shadow: 0 0 0 4px var(--ds-tint-soft); }
+.price-wrap b { color: var(--ds-ink-3); }
+
+/* Control segmentado en cápsula */
+.seg { background: var(--ds-fill); border-radius: var(--ds-r-pill); padding: 4px; gap: 4px; }
+.seg button { border-radius: var(--ds-r-pill); min-height: 40px; color: var(--ds-ink-2); }
+.seg button[aria-pressed="true"] { background: var(--ds-surface); color: var(--ds-ink); box-shadow: 0 2px 8px rgba(14, 27, 51, 0.12), 0 0 0 0.5px rgba(14, 27, 51, 0.04); }
+
+/* Avisos y notas */
+.err { border-radius: var(--ds-r-field); background: var(--ds-neg-soft); color: var(--ds-neg); }
+.note { border-radius: var(--ds-r-field); background: var(--ds-tint-soft); color: var(--ds-ink); }
+.found li, .mails li { border-radius: 14px; background: var(--ds-surface-2); }
+.guide li::before { background: var(--ds-tint-soft); color: var(--ds-tint); }
+.peek summary, .how summary { color: var(--ds-tint); }
+.how summary { color: var(--ds-ink); }
+.raw { background: var(--ds-surface-2); border-radius: 12px; }
+.mono { background: var(--ds-fill); font-family: var(--ds-font-mono); }
+
+/* Aviso flotante de vidrio */
+.toast {
+  border-radius: var(--ds-r-pill); background: rgba(14, 27, 51, 0.86); color: #fff; padding: 8px 20px;
+  -webkit-backdrop-filter: var(--ds-glass-blur); backdrop-filter: var(--ds-glass-blur);
+  box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.25), 0 10px 30px rgba(14, 27, 51, 0.3);
+}
+/* ── fin de componentes ── */
+/* Tarjetas secundarias (Master: por tarjeta, cuotas; plegables) */
+.tile, .cq { border: 0; border-radius: 20px; background: var(--ds-surface); box-shadow: var(--ds-shadow-1); }
+.fold { border: 0; border-radius: var(--ds-r-card); background: var(--ds-surface); box-shadow: var(--ds-shadow-1); }
+.stepper button, .step-val { border: 0; background: var(--ds-surface-2); border-radius: var(--ds-r-field); }
+.period { border-top: 0.5px solid var(--ds-line-2); }
+.linkrow { border: 0; border-radius: var(--ds-r-card); background: var(--ds-surface); box-shadow: var(--ds-shadow-1); min-height: 64px; padding: 12px 14px 12px 12px; }
+.linkrow:active { background: var(--ds-surface-2); }
+.linkrow > svg { color: var(--ds-ink-3); }
+.mark.sm { width: 40px; height: 40px; border-radius: 11px; }
+.num { background: var(--ds-tint-soft); color: var(--ds-tint); }
+.mark.app-icon { display: block; padding: 0; background: none; object-fit: cover; border-radius: 23%; box-shadow: 0 0 0 0.5px rgba(14, 27, 51, 0.08), 0 4px 12px rgba(41, 80, 244, 0.25); }
+.panel .btn.ghost { background: var(--ds-fill); box-shadow: none; }
+
+/*DS:LAYER:END*/
 </style>
 </head>
 <body>
@@ -348,7 +576,7 @@ svg { display: block; }
   var OWNER = /\.github\.io$/i.test(location.hostname) ? location.hostname.split('.')[0] : '';
   var WIDGET_TITLE = 'FAN · widget';   // hito del buzón donde se publica el saldo para el widget
   // Script del widget para la app Scriptable (el mismo de widget/fan-widget.js); al copiarlo se completa con el buzón y el token
-  var WIDGET_CODE = "// Variables used by Scriptable.\n// These must be at the very top of the file. Do not edit.\n// icon-color: purple; icon-glyph: wallet;\n\n// FAN · widget para la pantalla de inicio del iPhone (app Scriptable)\n//\n// Muestra el saldo de la cuenta y las tres últimas compras. Parte del saldo que FAN publica en el buzón\n// (el repositorio privado de GitHub) y le suma las compras que llegaron después, aunque no hayas abierto FAN.\n// No copies este archivo a mano: usa el botón «Copiar el script del widget» de FAN, que completa las dos\n// líneas siguientes con tu repositorio y tu token.\nconst REPO = '__REPO__';\nconst TOKEN = '__TOKEN__';\n\nconst API = 'https://api.github.com/repos/' + REPO;\nconst MS_TITLE = 'FAN · widget';\nconst MES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];\n\n/* ---------- Formatos ---------- */\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction dots(n) { return String(Math.round(Math.abs(n))).replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.'); }\nfunction money(n) { return (n < 0 ? '−' : '') + '$' + dots(n); }\nfunction hm(d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()); }\nfunction dayLabel(k) {\n  const t = new Date(), y = new Date(t.getFullYear(), t.getMonth(), t.getDate() - 1);\n  if (k === dayKey(t)) return 'hoy';\n  if (k === dayKey(y)) return 'ayer';\n  const p = k.split('-');\n  return (+p[2]) + ' ' + MES[+p[1] - 1];\n}\nfunction validDate(k) {\n  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(k)) return false;\n  const p = k.split('-'), d = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2]));\n  return d.getUTCFullYear() === +p[0] && d.getUTCMonth() === +p[1] - 1 && d.getUTCDate() === +p[2];\n}\n\n/* ---------- Lector de los avisos del banco (el mismo de FAN) ---------- */\nconst CP1252 = { 0x20ac: 0x80, 0x201a: 0x82, 0x0192: 0x83, 0x201e: 0x84, 0x2026: 0x85, 0x2020: 0x86, 0x2021: 0x87, 0x02c6: 0x88, 0x2030: 0x89, 0x0160: 0x8a,\n  0x2039: 0x8b, 0x0152: 0x8c, 0x017d: 0x8e, 0x2018: 0x91, 0x2019: 0x92, 0x201c: 0x93, 0x201d: 0x94, 0x2022: 0x95, 0x2013: 0x96, 0x2014: 0x97, 0x02dc: 0x98,\n  0x2122: 0x99, 0x0161: 0x9a, 0x203a: 0x9b, 0x0153: 0x9c, 0x017e: 0x9e, 0x0178: 0x9f };\nfunction contByte(ch) { let c = ch.charCodeAt(0); if (c > 0xff) c = CP1252[c] || 0; return c >= 0x80 && c <= 0xbf ? c : -1; }\nfunction demojibake(s) {\n  if (!/[ÂÃâ]/.test(s)) return s;\n  return s.replace(/[ÂÃ][^\\u0000-\\u007f]|â[^\\u0000-\\u007f]{2}/g, function (seq) {\n    const b1 = contByte(seq.charAt(1)), b2 = seq.length > 2 ? contByte(seq.charAt(2)) : 0;\n    if (b1 < 0 || b2 < 0) return seq;\n    return String.fromCharCode(seq.length > 2 ? (0x2 << 12) | ((b1 & 0x3f) << 6) | (b2 & 0x3f) : ((seq.charCodeAt(0) & 0x1f) << 6) | (b1 & 0x3f));\n  });\n}\nconst ENT = { nbsp: ' ', amp: '&', lt: '<', gt: '>', quot: '\"', apos: \"'\", dollar: '$', eacute: 'é', Eacute: 'É', aacute: 'á', iacute: 'í', oacute: 'ó', uacute: 'ú', ntilde: 'ñ', Ntilde: 'Ñ' };\nfunction plainText(s) {\n  s = String(s == null ? '' : s);\n  if (s.length > 400000) s = s.slice(-400000);\n  s = demojibake(s);\n  if (s.normalize) s = s.normalize('NFC');\n  if (/<[a-z!\\/][^>]*>/i.test(s)) s = s.replace(/<(script|style)\\b[\\s\\S]*?<\\/\\1>/gi, ' ').replace(/<[^>]+>/g, ' ');\n  s = s.replace(/&(#x?[0-9a-f]+|[a-z]+);/gi, function (all, e) {\n    if (e.charAt(0) === '#') {\n      const c = e.charAt(1).toLowerCase() === 'x' ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10);\n      return c > 0 && c < 0x10000 ? String.fromCharCode(c) : ' ';\n    }\n    return Object.prototype.hasOwnProperty.call(ENT, e) ? ENT[e] : all;\n  });\n  return s.replace(/[\\s ​‌‍﻿]+/g, ' ');\n}\nfunction clean(s) { return String(s == null ? '' : s).replace(/\\s+/g, ' ').trim().slice(0, 60); }\nfunction skel(key) {\n  const p = String(key).split('|');\n  return p[0] + '|' + (p[1] || '') + '|' + p.slice(2).join('').toUpperCase().replace(/[^A-Z0-9]/g, '');\n}\n// Devuelve las compras con cargo a la cuenta que trae un texto. Deja fuera las de tarjeta de crédito y en dólares.\nfunction parseMail(raw) {\n  const text = plainText(raw);\n  const re = /compra\\W{1,4}por\\W{1,4}?(US\\$|USD|\\$)?\\W{0,3}?([\\d.]+(?:,\\d{1,2})?)\\W{1,4}con\\W{1,4}(?:cargo\\W{1,4}a\\W{1,4})?(.{1,60}?)\\s+en\\s+(.{1,80}?)\\s+el\\s+(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})\\W{1,4}(\\d{1,2}):(\\d{2})/gi;\n  const out = [];\n  let m;\n  while ((m = re.exec(text))) {\n    const cur = (m[1] || '$').toUpperCase(), medio = m[3], merchant = clean(m[4]);\n    const amount = parseInt(m[2].replace(/\\./g, '').replace(/,.*$/, ''), 10);\n    const date = m[7] + '-' + pad(+m[6]) + '-' + pad(+m[5]), time = pad(+m[8]) + ':' + m[9];\n    if (!validDate(date) || !/^([01]\\d|2[0-3]):[0-5]\\d$/.test(time) || !merchant || !(amount > 0)) continue;\n    if (cur !== '$' || /cr.{0,12}dito/i.test(medio)) continue;\n    out.push({ d: date, h: time, c: merchant, m: amount, acct: (/(\\d{4})\\W*$/.exec(medio) || [])[1] || '',\n      key: date + 'T' + time + '|' + amount + '|' + merchant.toUpperCase() });\n  }\n  return out;\n}\n\n/* ---------- Datos ---------- */\nasync function gh(path) {\n  const r = new Request(API + path);\n  r.headers = { Authorization: 'Bearer ' + TOKEN, Accept: 'application/vnd.github+json' };\n  r.timeoutInterval = 20;\n  const data = await r.loadJSON();\n  const code = r.response && r.response.statusCode;\n  if (code && code >= 400) { const e = new Error('GitHub ' + code); e.status = code; throw e; }\n  return data;\n}\nfunction cachePath() { const fm = FileManager.local(); return fm.joinPath(fm.documentsDirectory(), 'fan-widget.json'); }\nfunction readCache() {\n  try { const fm = FileManager.local(), p = cachePath(); return fm.fileExists(p) ? JSON.parse(fm.readString(p)) : null; } catch (e) { return null; }\n}\nfunction writeCache(res) { try { FileManager.local().writeString(cachePath(), JSON.stringify(res)); } catch (e) {} }\n\n// Saldo publicado por FAN + compras que llegaron al buzón después de la última vez que FAN lo leyó\nasync function load() {\n  const list = await gh('/milestones?state=all&per_page=100');\n  const ms = (Array.isArray(list) ? list : []).filter(function (x) { return x && x.title === MS_TITLE; })[0];\n  let st = null;\n  try { st = ms && ms.description ? JSON.parse(ms.description) : null; } catch (e) { st = null; }\n  if (!st || st.app !== 'fan') return { msg: 'Abre FAN y activa el widget en «Buzón y atajo».' };\n\n  const known = {};\n  (st.keys || []).forEach(function (k) { known[k] = 1; });\n  const acct = /^\\d{4}$/.test(String(st.acct || '')) ? String(st.acct) : '';\n  const since = st.read > 0 ? '&since=' + encodeURIComponent(new Date(st.read - 30 * 60000).toISOString().replace(/\\.\\d+Z$/, 'Z')) : '';\n  const nuevas = [];\n  for (let page = 1; page <= 3; page++) {\n    const issues = await gh('/issues?state=all&sort=created&direction=asc&per_page=100&page=' + page + since);\n    if (!Array.isArray(issues)) break;\n    issues.forEach(function (it) {\n      if (!it || it.pull_request) return;\n      const title = String(it.title || '');\n      parseMail((title.length > 20 ? title + '\\n' : '') + String(it.body || '')).forEach(function (f) {\n        const sk = skel(f.key);\n        if (known[sk]) return;\n        known[sk] = 1;\n        if (acct && f.acct && f.acct !== acct) return;            // FAN sigue una sola cuenta\n        if (st.at && f.d + 'T' + f.h < st.at) return;             // anterior al último ajuste de saldo\n        nuevas.push(f);\n      });\n    });\n    if (issues.length < 100) break;\n  }\n  let saldo = typeof st.saldo === 'number' ? st.saldo : null;\n  if (saldo !== null) nuevas.forEach(function (f) { saldo -= f.m; });\n  const buys = (st.ult || []).concat(nuevas).filter(function (b) { return b && b.d && b.m > 0; })\n    .sort(function (a, b) { return (a.d + 'T' + a.h) < (b.d + 'T' + b.h) ? 1 : -1; }).slice(0, 3)\n    .map(function (b) { return { d: b.d, h: b.h, c: String(b.c || 'Compra'), m: b.m }; });\n  return { saldo: saldo, buys: buys, nuevas: nuevas.length, at: Date.now() };\n}\n\n/* ---------- Dibujo ---------- */\nconst WHITE = new Color('#ffffff'), GOLD = new Color('#ffcf70');\nfunction label(stack, str, size, color, opacity, bold) {\n  const t = stack.addText(str);\n  t.font = bold ? Font.boldSystemFont(size) : Font.systemFont(size);\n  t.textColor = color || WHITE;\n  if (opacity) t.textOpacity = opacity;\n  t.lineLimit = 1;\n  return t;\n}\nfunction build(res, family) {\n  const w = new ListWidget();\n  const lock = String(family || '').indexOf('accessory') === 0;\n  const small = family === 'small';\n  if (lock) {\n    // Pantalla bloqueada: saldo y última compra\n    label(w, 'FAN ' + (res.msg ? '' : res.saldo === null ? 'sin saldo' : money(res.saldo)), 14, null, 0, true).minimumScaleFactor = 0.6;\n    if (res.msg) label(w, res.msg, 11).lineLimit = 2;\n    else if (res.buys.length) label(w, res.buys[0].c + ' ' + money(-res.buys[0].m), 11).minimumScaleFactor = 0.7;\n    return w;\n  }\n  const g = new LinearGradient();\n  g.colors = [new Color('#873a9c'), new Color('#34113f')];\n  g.locations = [0, 1];\n  g.startPoint = new Point(0, 0);\n  g.endPoint = new Point(1, 1);\n  w.backgroundGradient = g;\n  w.setPadding(small ? 12 : 14, small ? 12 : 16, small ? 10 : 12, small ? 12 : 16);\n\n  const head = w.addStack();\n  head.layoutHorizontally();\n  head.centerAlignContent();\n  label(head, 'SALDO FAN', small ? 9 : 10, GOLD, 0, true);\n  head.addSpacer();\n  if (res.at) label(head, (res.old ? 'sin conexión · ' : '') + hm(new Date(res.at)), 9, WHITE, 0.6);\n  w.addSpacer(2);\n\n  if (res.msg) {\n    const t = label(w, res.msg, small ? 12 : 14, WHITE, 0.9);\n    t.lineLimit = 4;\n    w.addSpacer();\n    return w;\n  }\n  const total = label(w, res.saldo === null ? 'Sin definir' : money(res.saldo), small ? 22 : 28, WHITE, 0, true);\n  total.minimumScaleFactor = 0.5;\n  w.addSpacer(small ? 4 : 8);\n\n  if (!res.buys.length) label(w, 'Aún no hay compras', 12, WHITE, 0.7);\n  res.buys.forEach(function (b, i) {\n    if (i) w.addSpacer(small ? 2 : 4);\n    const row = w.addStack();\n    row.layoutHorizontally();\n    row.centerAlignContent();\n    if (!small) { label(row, dayLabel(b.d) + ' ' + b.h, 10, WHITE, 0.6); row.addSpacer(6); }\n    label(row, b.c, small ? 10 : 12, WHITE, 0.95);\n    row.addSpacer();\n    label(row, money(-b.m), small ? 10 : 12, WHITE, 0, true);\n  });\n  w.addSpacer();\n  return w;\n}\n\n/* ---------- Ejecución ---------- */\nlet res;\nif (/^__/.test(TOKEN) || /^__/.test(REPO)) {\n  res = { msg: 'Copia este script desde FAN, con el botón «Copiar el script del widget».' };\n} else {\n  try {\n    res = await load();\n    if (!res.msg) writeCache(res);\n  } catch (e) {\n    const c = readCache();\n    if (c && !c.msg) { res = c; res.old = true; }\n    else res = { msg: e && e.status === 401 ? 'El token venció. Copia de nuevo el script desde FAN.' : 'No se pudo leer el buzón. Revisa la conexión.' };\n  }\n}\nconst widget = build(res, config.widgetFamily);\nwidget.refreshAfterDate = new Date(Date.now() + 10 * 60 * 1000);\nif (config.runsInWidget) Script.setWidget(widget);\nelse await widget.presentMedium();\nScript.complete();\n";
+  var WIDGET_CODE = "// Variables used by Scriptable.\n// These must be at the very top of the file. Do not edit.\n// icon-color: blue; icon-glyph: wallet;\n\n// FAN · widget para la pantalla de inicio del iPhone (app Scriptable)\n//\n// Muestra el saldo de la cuenta y las tres últimas compras. Parte del saldo que FAN publica en el buzón\n// (el repositorio privado de GitHub) y le suma las compras que llegaron después, aunque no hayas abierto FAN.\n// No copies este archivo a mano: usa el botón «Copiar el script del widget» de FAN, que completa las dos\n// líneas siguientes con tu repositorio y tu token.\nconst REPO = '__REPO__';\nconst TOKEN = '__TOKEN__';\n\nconst API = 'https://api.github.com/repos/' + REPO;\nconst MS_TITLE = 'FAN · widget';\nconst MES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];\n\n/* ---------- Formatos ---------- */\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction dots(n) { return String(Math.round(Math.abs(n))).replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.'); }\nfunction money(n) { return (n < 0 ? '−' : '') + '$' + dots(n); }\nfunction hm(d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()); }\nfunction dayLabel(k) {\n  const t = new Date(), y = new Date(t.getFullYear(), t.getMonth(), t.getDate() - 1);\n  if (k === dayKey(t)) return 'hoy';\n  if (k === dayKey(y)) return 'ayer';\n  const p = k.split('-');\n  return (+p[2]) + ' ' + MES[+p[1] - 1];\n}\nfunction validDate(k) {\n  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(k)) return false;\n  const p = k.split('-'), d = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2]));\n  return d.getUTCFullYear() === +p[0] && d.getUTCMonth() === +p[1] - 1 && d.getUTCDate() === +p[2];\n}\n\n/* ---------- Lector de los avisos del banco (el mismo de FAN) ---------- */\nconst CP1252 = { 0x20ac: 0x80, 0x201a: 0x82, 0x0192: 0x83, 0x201e: 0x84, 0x2026: 0x85, 0x2020: 0x86, 0x2021: 0x87, 0x02c6: 0x88, 0x2030: 0x89, 0x0160: 0x8a,\n  0x2039: 0x8b, 0x0152: 0x8c, 0x017d: 0x8e, 0x2018: 0x91, 0x2019: 0x92, 0x201c: 0x93, 0x201d: 0x94, 0x2022: 0x95, 0x2013: 0x96, 0x2014: 0x97, 0x02dc: 0x98,\n  0x2122: 0x99, 0x0161: 0x9a, 0x203a: 0x9b, 0x0153: 0x9c, 0x017e: 0x9e, 0x0178: 0x9f };\nfunction contByte(ch) { let c = ch.charCodeAt(0); if (c > 0xff) c = CP1252[c] || 0; return c >= 0x80 && c <= 0xbf ? c : -1; }\nfunction demojibake(s) {\n  if (!/[ÂÃâ]/.test(s)) return s;\n  return s.replace(/[ÂÃ][^\\u0000-\\u007f]|â[^\\u0000-\\u007f]{2}/g, function (seq) {\n    const b1 = contByte(seq.charAt(1)), b2 = seq.length > 2 ? contByte(seq.charAt(2)) : 0;\n    if (b1 < 0 || b2 < 0) return seq;\n    return String.fromCharCode(seq.length > 2 ? (0x2 << 12) | ((b1 & 0x3f) << 6) | (b2 & 0x3f) : ((seq.charCodeAt(0) & 0x1f) << 6) | (b1 & 0x3f));\n  });\n}\nconst ENT = { nbsp: ' ', amp: '&', lt: '<', gt: '>', quot: '\"', apos: \"'\", dollar: '$', eacute: 'é', Eacute: 'É', aacute: 'á', iacute: 'í', oacute: 'ó', uacute: 'ú', ntilde: 'ñ', Ntilde: 'Ñ' };\nfunction plainText(s) {\n  s = String(s == null ? '' : s);\n  if (s.length > 400000) s = s.slice(-400000);\n  s = demojibake(s);\n  if (s.normalize) s = s.normalize('NFC');\n  if (/<[a-z!\\/][^>]*>/i.test(s)) s = s.replace(/<(script|style)\\b[\\s\\S]*?<\\/\\1>/gi, ' ').replace(/<[^>]+>/g, ' ');\n  s = s.replace(/&(#x?[0-9a-f]+|[a-z]+);/gi, function (all, e) {\n    if (e.charAt(0) === '#') {\n      const c = e.charAt(1).toLowerCase() === 'x' ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10);\n      return c > 0 && c < 0x10000 ? String.fromCharCode(c) : ' ';\n    }\n    return Object.prototype.hasOwnProperty.call(ENT, e) ? ENT[e] : all;\n  });\n  return s.replace(/[\\s ​‌‍﻿]+/g, ' ');\n}\nfunction clean(s) { return String(s == null ? '' : s).replace(/\\s+/g, ' ').trim().slice(0, 60); }\nfunction skel(key) {\n  const p = String(key).split('|');\n  return p[0] + '|' + (p[1] || '') + '|' + p.slice(2).join('').toUpperCase().replace(/[^A-Z0-9]/g, '');\n}\n// Devuelve las compras con cargo a la cuenta que trae un texto. Deja fuera las de tarjeta de crédito y en dólares.\nfunction parseMail(raw) {\n  const text = plainText(raw);\n  const re = /compra\\W{1,4}por\\W{1,4}?(US\\$|USD|\\$)?\\W{0,3}?([\\d.]+(?:,\\d{1,2})?)\\W{1,4}con\\W{1,4}(?:cargo\\W{1,4}a\\W{1,4})?(.{1,60}?)\\s+en\\s+(.{1,80}?)\\s+el\\s+(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})\\W{1,4}(\\d{1,2}):(\\d{2})/gi;\n  const out = [];\n  let m;\n  while ((m = re.exec(text))) {\n    const cur = (m[1] || '$').toUpperCase(), medio = m[3], merchant = clean(m[4]);\n    const amount = parseInt(m[2].replace(/\\./g, '').replace(/,.*$/, ''), 10);\n    const date = m[7] + '-' + pad(+m[6]) + '-' + pad(+m[5]), time = pad(+m[8]) + ':' + m[9];\n    if (!validDate(date) || !/^([01]\\d|2[0-3]):[0-5]\\d$/.test(time) || !merchant || !(amount > 0)) continue;\n    if (cur !== '$' || /cr.{0,12}dito/i.test(medio)) continue;\n    out.push({ d: date, h: time, c: merchant, m: amount, acct: (/(\\d{4})\\W*$/.exec(medio) || [])[1] || '',\n      key: date + 'T' + time + '|' + amount + '|' + merchant.toUpperCase() });\n  }\n  return out;\n}\n\n/* ---------- Datos ---------- */\nasync function gh(path) {\n  const r = new Request(API + path);\n  r.headers = { Authorization: 'Bearer ' + TOKEN, Accept: 'application/vnd.github+json' };\n  r.timeoutInterval = 20;\n  const data = await r.loadJSON();\n  const code = r.response && r.response.statusCode;\n  if (code && code >= 400) { const e = new Error('GitHub ' + code); e.status = code; throw e; }\n  return data;\n}\nfunction cachePath() { const fm = FileManager.local(); return fm.joinPath(fm.documentsDirectory(), 'fan-widget.json'); }\nfunction readCache() {\n  try { const fm = FileManager.local(), p = cachePath(); return fm.fileExists(p) ? JSON.parse(fm.readString(p)) : null; } catch (e) { return null; }\n}\nfunction writeCache(res) { try { FileManager.local().writeString(cachePath(), JSON.stringify(res)); } catch (e) {} }\n\n// Saldo publicado por FAN + compras que llegaron al buzón después de la última vez que FAN lo leyó\nasync function load() {\n  const list = await gh('/milestones?state=all&per_page=100');\n  const ms = (Array.isArray(list) ? list : []).filter(function (x) { return x && x.title === MS_TITLE; })[0];\n  let st = null;\n  try { st = ms && ms.description ? JSON.parse(ms.description) : null; } catch (e) { st = null; }\n  if (!st || st.app !== 'fan') return { msg: 'Abre FAN y activa el widget en «Buzón y atajo».' };\n\n  const known = {};\n  (st.keys || []).forEach(function (k) { known[k] = 1; });\n  const acct = /^\\d{4}$/.test(String(st.acct || '')) ? String(st.acct) : '';\n  const since = st.read > 0 ? '&since=' + encodeURIComponent(new Date(st.read - 30 * 60000).toISOString().replace(/\\.\\d+Z$/, 'Z')) : '';\n  const nuevas = [];\n  for (let page = 1; page <= 3; page++) {\n    const issues = await gh('/issues?state=all&sort=created&direction=asc&per_page=100&page=' + page + since);\n    if (!Array.isArray(issues)) break;\n    issues.forEach(function (it) {\n      if (!it || it.pull_request) return;\n      const title = String(it.title || '');\n      parseMail((title.length > 20 ? title + '\\n' : '') + String(it.body || '')).forEach(function (f) {\n        const sk = skel(f.key);\n        if (known[sk]) return;\n        known[sk] = 1;\n        if (acct && f.acct && f.acct !== acct) return;            // FAN sigue una sola cuenta\n        if (st.at && f.d + 'T' + f.h < st.at) return;             // anterior al último ajuste de saldo\n        nuevas.push(f);\n      });\n    });\n    if (issues.length < 100) break;\n  }\n  let saldo = typeof st.saldo === 'number' ? st.saldo : null;\n  if (saldo !== null) nuevas.forEach(function (f) { saldo -= f.m; });\n  const buys = (st.ult || []).concat(nuevas).filter(function (b) { return b && b.d && b.m > 0; })\n    .sort(function (a, b) { return (a.d + 'T' + a.h) < (b.d + 'T' + b.h) ? 1 : -1; }).slice(0, 3)\n    .map(function (b) { return { d: b.d, h: b.h, c: String(b.c || 'Compra'), m: b.m }; });\n  return { saldo: saldo, buys: buys, nuevas: nuevas.length, at: Date.now() };\n}\n\n/* ---------- Dibujo ---------- */\nconst WHITE = new Color('#ffffff'), GOLD = new Color('#BDEBFB');\nfunction label(stack, str, size, color, opacity, bold) {\n  const t = stack.addText(str);\n  t.font = bold ? Font.boldSystemFont(size) : Font.systemFont(size);\n  t.textColor = color || WHITE;\n  if (opacity) t.textOpacity = opacity;\n  t.lineLimit = 1;\n  return t;\n}\nfunction build(res, family) {\n  const w = new ListWidget();\n  const lock = String(family || '').indexOf('accessory') === 0;\n  const small = family === 'small';\n  if (lock) {\n    // Pantalla bloqueada: saldo y última compra\n    label(w, 'FAN ' + (res.msg ? '' : res.saldo === null ? 'sin saldo' : money(res.saldo)), 14, null, 0, true).minimumScaleFactor = 0.6;\n    if (res.msg) label(w, res.msg, 11).lineLimit = 2;\n    else if (res.buys.length) label(w, res.buys[0].c + ' ' + money(-res.buys[0].m), 11).minimumScaleFactor = 0.7;\n    return w;\n  }\n  const g = new LinearGradient();\n  g.colors = [new Color('#4D78F3'), new Color('#2141D6')];\n  g.locations = [0, 1];\n  g.startPoint = new Point(0, 0);\n  g.endPoint = new Point(1, 1);\n  w.backgroundGradient = g;\n  w.setPadding(small ? 12 : 14, small ? 12 : 16, small ? 10 : 12, small ? 12 : 16);\n\n  const head = w.addStack();\n  head.layoutHorizontally();\n  head.centerAlignContent();\n  label(head, 'SALDO FAN', small ? 9 : 10, GOLD, 0, true);\n  head.addSpacer();\n  if (res.at) label(head, (res.old ? 'sin conexión · ' : '') + hm(new Date(res.at)), 9, WHITE, 0.6);\n  w.addSpacer(2);\n\n  if (res.msg) {\n    const t = label(w, res.msg, small ? 12 : 14, WHITE, 0.9);\n    t.lineLimit = 4;\n    w.addSpacer();\n    return w;\n  }\n  const total = label(w, res.saldo === null ? 'Sin definir' : money(res.saldo), small ? 22 : 28, WHITE, 0, true);\n  total.minimumScaleFactor = 0.5;\n  w.addSpacer(small ? 4 : 8);\n\n  if (!res.buys.length) label(w, 'Aún no hay compras', 12, WHITE, 0.7);\n  res.buys.forEach(function (b, i) {\n    if (i) w.addSpacer(small ? 2 : 4);\n    const row = w.addStack();\n    row.layoutHorizontally();\n    row.centerAlignContent();\n    if (!small) { label(row, dayLabel(b.d) + ' ' + b.h, 10, WHITE, 0.6); row.addSpacer(6); }\n    label(row, b.c, small ? 10 : 12, WHITE, 0.95);\n    row.addSpacer();\n    label(row, money(-b.m), small ? 10 : 12, WHITE, 0, true);\n  });\n  w.addSpacer();\n  return w;\n}\n\n/* ---------- Ejecución ---------- */\nlet res;\nif (/^__/.test(TOKEN) || /^__/.test(REPO)) {\n  res = { msg: 'Copia este script desde FAN, con el botón «Copiar el script del widget».' };\n} else {\n  try {\n    res = await load();\n    if (!res.msg) writeCache(res);\n  } catch (e) {\n    const c = readCache();\n    if (c && !c.msg) { res = c; res.old = true; }\n    else res = { msg: e && e.status === 401 ? 'El token venció. Copia de nuevo el script desde FAN.' : 'No se pudo leer el buzón. Revisa la conexión.' };\n  }\n}\nconst widget = build(res, config.widgetFamily);\nwidget.refreshAfterDate = new Date(Date.now() + 10 * 60 * 1000);\nif (config.runsInWidget) Script.setWidget(widget);\nelse await widget.presentMedium();\nScript.complete();\n";
 
   var MARK = '<circle cx="12" cy="8.4" r="5.4" fill="currentColor" opacity="0.5"/>' +
     '<path d="M2.6 11.3 12 16.9l9.4-5.6v7.6a2 2 0 0 1-2 2H4.6a2 2 0 0 1-2-2z" fill="currentColor"/>';
@@ -937,7 +1165,7 @@ svg { display: block; }
 
   /* ---------- Vistas ---------- */
   function header() {
-    return '<header class="top"><span class="mark">' + I_MARK + '</span><div><div class="eyebrow">Cuenta · registro personal</div><h1>FAN</h1></div></header>';
+    return '<header class="top"><img class="mark app-icon" src="icons/apple-touch-icon.png" alt=""><div><div class="eyebrow">Cuenta · registro personal</div><h1>FAN</h1></div></header>';
   }
 
   function hero(c) {

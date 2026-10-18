@@ -1,6 +1,6 @@
 // Variables used by Scriptable.
 // These must be at the very top of the file. Do not edit.
-// icon-color: purple; icon-glyph: wallet;
+// icon-color: blue; icon-glyph: wallet;
 
 // FAN · widget para la pantalla de inicio del iPhone (app Scriptable)
 //
@@ -141,7 +141,7 @@ async function load() {
 }
 
 /* ---------- Dibujo ---------- */
-const WHITE = new Color('#ffffff'), GOLD = new Color('#ffcf70');
+const WHITE = new Color('#ffffff'), GOLD = new Color('#BDEBFB');
 function label(stack, str, size, color, opacity, bold) {
   const t = stack.addText(str);
   t.font = bold ? Font.boldSystemFont(size) : Font.systemFont(size);
@@ -162,7 +162,7 @@ function build(res, family) {
     return w;
   }
   const g = new LinearGradient();
-  g.colors = [new Color('#873a9c'), new Color('#34113f')];
+  g.colors = [new Color('#4D78F3'), new Color('#2141D6')];
   g.locations = [0, 1];
   g.startPoint = new Point(0, 0);
   g.endPoint = new Point(1, 1);
